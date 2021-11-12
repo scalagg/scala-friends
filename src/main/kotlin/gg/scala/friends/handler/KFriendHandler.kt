@@ -83,7 +83,7 @@ object KFriendHandler
 
         if (PlayerCachingExtension.loaded)
         {
-            PlayerCachingExtension.retrieve(uniqueId).thenAccept {
+            PlayerCachingExtension.handle.fetchEntryByKey(uniqueId.toString()).thenAccept {
                 if (it == null)
                 {
                     player.sendMessage("${CC.YELLOW}$username${CC.RED} is not online.")
