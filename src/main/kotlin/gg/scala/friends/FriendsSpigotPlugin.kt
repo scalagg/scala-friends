@@ -3,8 +3,10 @@ package gg.scala.friends
 import gg.scala.banana.Banana
 import gg.scala.banana.options.BananaOptions
 import gg.scala.commons.ExtendedScalaPlugin
+import gg.scala.cookie.Cookie
 import gg.scala.friends.handler.KFriendHandler
 import gg.scala.friends.registrar.impl.KPlayerHandler
+import gg.scala.friends.settings.FriendsSettingsImpl
 import gg.scala.lemon.Lemon
 import net.evilblock.cubed.command.manager.CubedCommandManager
 
@@ -20,6 +22,8 @@ class FriendsSpigotPlugin : ExtendedScalaPlugin()
 
         registerBananaHandlers()
         registerAcfCommands()
+
+        Cookie.instance.playerSettings.add(FriendsSettingsImpl)
     }
 
     private fun registerBananaHandlers()
