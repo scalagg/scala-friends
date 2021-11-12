@@ -27,11 +27,11 @@ object FriendPaginatedResult : PaginatedResult<UUID>()
                 "${CC.GREEN} ● ${CC.PRI}${fundamental.username}${CC.SEC} is on ${fundamental.currentServer}."
             } else
             {
-                "${CC.RED} ● ${CC.PRI}$username"
+                "${CC.RED} ● ${CC.PRI}$username${CC.SEC} is offline."
             }
         } else
         {
-            return "${CC.GRAY} ● ${CC.PRI}$username"
+            return "${CC.GRAY} ● ${CC.PRI}$username${CC.SEC} is offline."
         }
     }
 
