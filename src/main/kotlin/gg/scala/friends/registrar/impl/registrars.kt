@@ -26,7 +26,7 @@ object KPlayerHandler : ObjectRegistrar<UUID, KFriendsPlayer>()
             UriMongoConnection(
                 Lemon.instance.mongoConfig.uri
             ),
-            "SolexGames", "friend_players",
+            "Scala", "friend_players",
             KFriendsPlayer::class.java
         ).also {
             playerHandle = it
