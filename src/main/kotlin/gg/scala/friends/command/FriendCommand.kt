@@ -3,10 +3,13 @@ package gg.scala.friends.command
 import gg.scala.friends.handler.KFriendHandler
 import gg.scala.friends.registrar.impl.KPlayerHandler
 import gg.scala.friends.result.FriendPaginatedResult
+import gg.scala.lemon.handler.PlayerHandler
+import gg.scala.lemon.player.metadata.Metadata
 import net.evilblock.cubed.acf.BaseCommand
 import net.evilblock.cubed.acf.CommandHelp
 import net.evilblock.cubed.acf.annotation.*
 import net.evilblock.cubed.acf.annotation.Optional
+import net.evilblock.cubed.util.CC
 import org.bukkit.entity.Player
 import java.util.*
 import java.util.concurrent.ForkJoinPool
@@ -15,9 +18,24 @@ import java.util.concurrent.ForkJoinPool
  * @author GrowlyX
  * @since 11/11/2021
  */
-@CommandAlias("friend|friends|f")
+@CommandAlias("friend|friends|fr|f")
 class FriendCommand : BaseCommand()
 {
+    @CommandAlias("togglefriendinvitations|tfi|tfr|togglefriendrequests|togglefriendinvites")
+    fun onToggleFriendRequests(player: Player)
+    {
+        val lemonPlayer = PlayerHandler.findPlayer(player).orElse(null)
+        val friendsRequests = lemonPlayer.getSetting("friend-requests-disabled")
+
+        if (friendsRequests) {
+            lemonPlayer remove "friend-requests-disabled"
+            player.sendMessage("${CC.GREEN}You've enabled friend invitations.")
+        } else {
+            lemonPlayer.updateOrAddMetadata("friend-requests-disabled", Metadata(true))
+            player.sendMessage("${CC.RED}You've disabled friend invitations.")
+        }
+    }
+
     @Default
     @HelpCommand
     fun onHelp(help: CommandHelp)
@@ -25,7 +43,7 @@ class FriendCommand : BaseCommand()
         help.showHelp()
     }
 
-    @CommandAlias("fl")
+    @CommandAlias("fl|flist")
     @Subcommand("list")
     @Description("View all your friends.")
     fun onList(player: Player, @Optional page: Int?)
