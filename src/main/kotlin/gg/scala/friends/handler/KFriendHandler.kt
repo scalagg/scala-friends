@@ -69,6 +69,11 @@ object KFriendHandler
         val friendPlayer = KPlayerHandler.find(player)
             ?: throw RuntimeException()
 
+        if (player.uniqueId == uniqueId)
+        {
+            throw ConditionFailedException("You cannot add yourself as a friend.")
+        }
+
         val username = CubedCacheUtil.fetchName(uniqueId)!!
 
         if (friendPlayer.friends[uniqueId] != null)
@@ -109,19 +114,22 @@ object KFriendHandler
                     return@whenComplete
                 }
 
-                internalHandleFriendRequestDispatch(player, uniqueId, username)
+                internalHandleFriendRequestDispatch(player, uniqueId)
             }
         }
     }
 
-    private fun internalHandleFriendRequestDispatch(player: Player, uniqueId: UUID, username: String)
+    private fun internalHandleFriendRequestDispatch(player: Player, uniqueId: UUID)
     {
         val message = FancyMessage()
         message.withMessage(
             "",
-            " ${CC.PRI}$username${CC.SEC} sent you a friend request!",
-            " ${CC.GREEN}[CLICK TO ACCEPT]",
+            " ${CC.PRI}${player.name}${CC.SEC} sent you a friend request!",
+            " ${CC.B_GREEN}[CLICK TO ACCEPT]",
             ""
+        )
+        message.andHoverOf(
+            "${CC.GREEN}Click to accept ${CC.YELLOW}${player.name}'s${CC.GREEN} friend request!"
         )
         message.andCommandOf(
             ClickEvent.Action.RUN_COMMAND,
@@ -147,6 +155,11 @@ object KFriendHandler
     {
         val friendPlayer = KPlayerHandler.find(player)
             ?: throw RuntimeException()
+
+        if (player.uniqueId == uniqueId)
+        {
+            throw ConditionFailedException("You cannot add yourself as a friend.")
+        }
 
         val username = CubedCacheUtil.fetchName(uniqueId)!!
 
