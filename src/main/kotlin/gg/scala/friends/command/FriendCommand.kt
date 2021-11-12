@@ -25,7 +25,8 @@ class FriendCommand : BaseCommand()
         help.showHelp()
     }
 
-    @Subcommand("list|fl")
+    @CommandAlias("fl")
+    @Subcommand("list")
     @Description("View all your friends.")
     fun onList(player: Player, @Optional page: Int?)
     {
