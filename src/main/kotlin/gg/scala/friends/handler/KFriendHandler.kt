@@ -11,8 +11,10 @@ import gg.scala.lemon.util.CubedCacheUtil
 import gg.scala.lemon.util.QuickAccess
 import net.evilblock.cubed.acf.ConditionFailedException
 import net.evilblock.cubed.util.CC
+import net.evilblock.cubed.util.bukkit.Constants
 import net.evilblock.cubed.util.bukkit.FancyMessage
 import net.md_5.bungee.api.chat.ClickEvent
+import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -24,6 +26,24 @@ import java.util.concurrent.TimeUnit
  */
 object KFriendHandler
 {
+    @Subscribe("friend-network-update")
+    fun subscribeOnFriendNetworkUpdate(message: Message)
+    {
+        val uniqueId = UUID.fromString(message["uniqueId"]!!)
+        val username = CubedCacheUtil.fetchName(uniqueId)!!
+        val type = message["type"]!!
+
+        for (player in Bukkit.getOnlinePlayers())
+        {
+            val friendPlayer = KPlayerHandler.find(uniqueId) ?: continue
+
+            if (friendPlayer.friends[uniqueId] != null)
+            {
+                player.sendMessage("${CC.B_PRI}Friends ${CC.GRAY}${Constants.DOUBLE_ARROW_RIGHT} ${CC.PRI}$username ${CC.SEC}$type.")
+            }
+        }
+    }
+
     @Subscribe("friend-request-accept")
     fun subscribeOnFriendRequestAccept(message: Message)
     {
@@ -31,6 +51,16 @@ object KFriendHandler
         val friendPlayer = KPlayerHandler.find(uniqueId) ?: return
 
         friendPlayer.friends[UUID.fromString(message["friend"]!!)] = System.currentTimeMillis()
+        friendPlayer.save()
+    }
+
+    @Subscribe("friend-request-removal")
+    fun subscribeOnFriendRequestRemoval(message: Message)
+    {
+        val uniqueId = UUID.fromString(message["friend"]!!)
+        val friendPlayer = KPlayerHandler.find(uniqueId) ?: return
+
+        friendPlayer.friends.remove(UUID.fromString(message["uniqueId"]!!))
         friendPlayer.save()
     }
 
@@ -157,18 +187,45 @@ object KFriendHandler
         )
 
         QuickAccess.sendGlobalPlayerMessage(
-            message = "${CC.GREEN}Your friend request to ${CC.PRI}${player.name}${CC.GREEN} has been accepted!", uuid = uniqueId
+            message = "${CC.GREEN}Your friend request to ${CC.PRI}${player.name}${CC.GREEN} has been accepted!",
+            uuid = uniqueId
         )
 
         player.sendMessage("${CC.SEC}You've accepted ${CC.PRI}$username's${CC.SEC} friend request.")
     }
 
-    fun attemptFriendRemoval(player: Player, target: UUID)
+    fun attemptFriendRemoval(player: Player, uniqueId: UUID)
     {
         val friendPlayer = KPlayerHandler.find(player)
             ?: throw RuntimeException()
 
+        val username = CubedCacheUtil.fetchName(uniqueId)!!
 
+        if (friendPlayer.friends[uniqueId] == null)
+        {
+            throw ConditionFailedException("${CC.YELLOW}$username${CC.RED} is not on your friends list.")
+        }
+
+        internalHandleFriendRemoval(player, uniqueId, username)
+    }
+
+    private fun internalHandleFriendRemoval(player: Player, uniqueId: UUID, username: String)
+    {
+        val friendPlayer = KPlayerHandler.find(player)
+            ?: throw RuntimeException()
+
+        friendPlayer.friends.remove(uniqueId)
+        friendPlayer.save()
+
+        RedisHandler.buildMessage(
+            packet = "friend-request-removal",
+            "uniqueId" to uniqueId.toString(),
+            "friend" to player.uniqueId.toString(),
+        ).dispatch(
+            "friends", Lemon.instance.banana
+        )
+
+        player.sendMessage("${CC.SEC}You've removed ${CC.PRI}$username${CC.SEC} from your friends list.")
     }
 
     private fun retrieveFriendRequestStatus(uniqueId: UUID): CompletableFuture<Boolean>

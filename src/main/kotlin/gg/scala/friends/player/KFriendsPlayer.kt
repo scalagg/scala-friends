@@ -16,6 +16,12 @@ class KFriendsPlayer(
 {
     val friends = mutableMapOf<UUID, Long>()
 
+    fun orderedFriends(): List<UUID>
+    {
+        return friends.keys.toList()
+            .sortedByDescending { friends[it]!! }
+    }
+
     override fun save(): CompletableFuture<Void>
     {
         return KPlayerHandler.playerHandle

@@ -1,0 +1,6 @@
+name: friends
+version: 1.0.0
+main: gg.scala.friends.proxy.FriendsProxyPlugin
+
+author: Scala
+website: https://scala.gg
