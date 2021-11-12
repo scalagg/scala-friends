@@ -4,6 +4,7 @@ import gg.scala.banana.Banana
 import gg.scala.banana.options.BananaOptions
 import gg.scala.commons.ExtendedScalaPlugin
 import gg.scala.friends.handler.KFriendHandler
+import gg.scala.friends.registrar.impl.KPlayerHandler
 import gg.scala.lemon.Lemon
 import net.evilblock.cubed.command.manager.CubedCommandManager
 
@@ -15,6 +16,8 @@ class FriendsSpigotPlugin : ExtendedScalaPlugin()
 {
     override fun enable()
     {
+        KPlayerHandler.initialLoad()
+
         registerBananaHandlers()
         registerAcfCommands()
     }
