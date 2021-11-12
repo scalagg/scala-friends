@@ -190,7 +190,7 @@ object KFriendHandler
         friendPlayer.save()
 
         Lemon.instance.banana.useResource {
-            it.hdel("friends:requests:${player.uniqueId}:$uniqueId")
+            it.hdel("friends:requests:${player.uniqueId}:$uniqueId", uniqueId.toString())
         }
 
         RedisHandler.buildMessage(
