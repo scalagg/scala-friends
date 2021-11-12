@@ -114,12 +114,12 @@ object KFriendHandler
                     return@whenComplete
                 }
 
-                internalHandleFriendRequestDispatch(player, uniqueId)
+                internalHandleFriendRequestDispatch(player, uniqueId, username)
             }
         }
     }
 
-    private fun internalHandleFriendRequestDispatch(player: Player, uniqueId: UUID)
+    private fun internalHandleFriendRequestDispatch(player: Player, uniqueId: UUID, username: String)
     {
         val message = FancyMessage()
         message.withMessage(
@@ -149,6 +149,8 @@ object KFriendHandler
         QuickAccess.sendGlobalPlayerFancyMessage(
             fancyMessage = message, uuid = uniqueId
         )
+
+        player.sendMessage("${CC.GREEN}You've sent a friend request to ${CC.YELLOW}$username${CC.GREEN}!")
     }
 
     fun attemptFriendRequestAcceptFrom(player: Player, uniqueId: UUID)
