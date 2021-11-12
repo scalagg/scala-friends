@@ -57,10 +57,10 @@ object KFriendHandler
     @Subscribe("friend-request-removal")
     fun subscribeOnFriendRequestRemoval(message: Message)
     {
-        val uniqueId = UUID.fromString(message["friend"]!!)
+        val uniqueId = UUID.fromString(message["uniqueId"]!!)
         val friendPlayer = KPlayerHandler.find(uniqueId) ?: return
 
-        friendPlayer.friends.remove(UUID.fromString(message["uniqueId"]!!))
+        friendPlayer.friends.remove(UUID.fromString(message["friend"]!!))
         friendPlayer.save()
     }
 
