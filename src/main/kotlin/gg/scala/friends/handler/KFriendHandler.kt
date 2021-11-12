@@ -35,7 +35,7 @@ object KFriendHandler
 
         for (player in Bukkit.getOnlinePlayers())
         {
-            val friendPlayer = KPlayerHandler.find(uniqueId) ?: continue
+            val friendPlayer = KPlayerHandler.find(player.uniqueId) ?: continue
 
             if (friendPlayer.friends[uniqueId] != null)
             {
