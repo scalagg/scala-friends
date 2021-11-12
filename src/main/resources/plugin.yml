@@ -5,4 +5,4 @@ main: gg.scala.friends.FriendsSpigotPlugin
 author: Scala
 website: https://scala.gg
 
-depend: [Lemon, Cubed, helper]
+depend: [Lemon, Cubed, helper, Cookie]
