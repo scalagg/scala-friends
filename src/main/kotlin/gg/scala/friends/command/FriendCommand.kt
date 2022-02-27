@@ -1,15 +1,12 @@
 package gg.scala.friends.command
 
 import gg.scala.friends.handler.KFriendHandler
-import gg.scala.friends.registrar.impl.KPlayerHandler
+import gg.scala.friends.registrar.KPlayerHandler
 import gg.scala.friends.result.FriendPaginatedResult
-import gg.scala.lemon.handler.PlayerHandler
-import gg.scala.lemon.player.metadata.Metadata
 import net.evilblock.cubed.acf.BaseCommand
 import net.evilblock.cubed.acf.CommandHelp
 import net.evilblock.cubed.acf.annotation.*
 import net.evilblock.cubed.acf.annotation.Optional
-import net.evilblock.cubed.util.CC
 import org.bukkit.entity.Player
 import java.util.*
 import java.util.concurrent.ForkJoinPool

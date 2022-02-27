@@ -2,13 +2,16 @@ package gg.scala.friends.handler
 
 import gg.scala.banana.annotate.Subscribe
 import gg.scala.banana.message.Message
-import gg.scala.friends.registrar.impl.KPlayerHandler
+import gg.scala.friends.registrar.KPlayerHandler
 import gg.scala.lemon.Lemon
-import gg.scala.lemon.handler.DataStoreHandler
+import gg.scala.lemon.handler.DataStoreOrchestrator
 import gg.scala.lemon.handler.RedisHandler
+import gg.scala.lemon.player.LemonPlayer
 import gg.scala.lemon.player.extension.PlayerCachingExtension
 import gg.scala.lemon.util.CubedCacheUtil
 import gg.scala.lemon.util.QuickAccess
+import gg.scala.store.controller.DataStoreObjectControllerCache
+import gg.scala.store.storage.type.DataStoreStorageType
 import net.evilblock.cubed.acf.ConditionFailedException
 import net.evilblock.cubed.util.CC
 import net.evilblock.cubed.util.bukkit.Constants
@@ -81,16 +84,26 @@ object KFriendHandler
             throw ConditionFailedException("You already have ${CC.YELLOW}$username${CC.RED} added as a friend.")
         }
 
+        handlePostPlayerOnlineCheck(player, uniqueId, username)
+
         if (PlayerCachingExtension.loaded)
         {
-            PlayerCachingExtension.handle.fetchEntryByKey(uniqueId.toString()).thenAccept {
+            PlayerCachingExtension.controller.load(
+                uniqueId, DataStoreStorageType.REDIS
+            ).thenAccept {
                 if (it == null)
                 {
                     player.sendMessage("${CC.YELLOW}$username${CC.RED} is not online.")
                     return@thenAccept
                 }
 
-                handlePostPlayerOnlineCheck(player, uniqueId, username)
+                try
+                {
+                    handlePostPlayerOnlineCheck(player, uniqueId, username)
+                } catch (e: Exception)
+                {
+                    e.printStackTrace()
+                }
             }
         } else
         {
@@ -100,21 +113,31 @@ object KFriendHandler
 
     private fun handlePostPlayerOnlineCheck(player: Player, uniqueId: UUID, username: String)
     {
-        hasOutgoingFriendRequestFrom(player.uniqueId, uniqueId).thenAccept {
+        hasOutgoingFriendRequestFrom(player.uniqueId, uniqueId).whenCompleteAsync { it, t ->
+            t?.printStackTrace()
+
             if (it)
             {
                 player.sendMessage("${CC.RED}You've already sent a friend request to ${CC.YELLOW}$username${CC.RED}, please wait.")
-                return@thenAccept
+                return@whenCompleteAsync
             }
 
-            retrieveFriendRequestStatus(uniqueId).whenComplete { disabled, _ ->
+            retrieveFriendRequestStatus(uniqueId).whenComplete { disabled, t ->
+                t?.printStackTrace()
+
                 if (disabled)
                 {
                     player.sendMessage("${CC.YELLOW}$username${CC.RED} has their friend requests disabled.")
                     return@whenComplete
                 }
 
-                internalHandleFriendRequestDispatch(player, uniqueId, username)
+                try
+                {
+                    internalHandleFriendRequestDispatch(player, uniqueId, username)
+                } catch (e: Exception)
+                {
+                    e.printStackTrace()
+                }
             }
         }
     }
@@ -245,21 +268,36 @@ object KFriendHandler
 
     private fun retrieveFriendRequestStatus(uniqueId: UUID): CompletableFuture<Boolean>
     {
-        return DataStoreHandler.lemonPlayerLayer.fetchEntryByKey(uniqueId.toString()).thenApply {
-            return@thenApply it.getSetting("friend-requests-disabled")
-        }
+        return DataStoreObjectControllerCache.findNotNull<LemonPlayer>()
+            .load(uniqueId, DataStoreStorageType.MONGO).thenApply {
+                try
+                {
+                    return@thenApply it?.getSetting("friend-requests-disabled") ?: false
+                } catch (e: Exception)
+                {
+                    e.printStackTrace()
+                    return@thenApply false
+                }
+            }
     }
 
     private fun hasOutgoingFriendRequestFrom(requester: UUID, target: UUID): CompletableFuture<Boolean>
     {
         return CompletableFuture.supplyAsync {
-            var exists = false
+            try
+            {
+                var exists = false
 
-            Lemon.instance.banana.useResource {
-                exists = it.hget("friends:requests:$target:$requester", requester.toString()) != null
+                Lemon.instance.banana.useResource {
+                    exists = it.hget("friends:requests:$target:$requester", requester.toString()) != null
+                }
+
+                return@supplyAsync exists
+            } catch (e: Exception)
+            {
+                e.printStackTrace()
+                return@supplyAsync false
             }
-
-            return@supplyAsync exists
         }
     }
 }

@@ -1,7 +1,9 @@
 package gg.scala.friends.player
 
 import gg.scala.common.Savable
-import gg.scala.friends.registrar.impl.KPlayerHandler
+import gg.scala.friends.registrar.KPlayerHandler
+import gg.scala.store.storage.storable.IDataStoreObject
+import gg.scala.store.storage.type.DataStoreStorageType
 import java.util.*
 import java.util.concurrent.CompletableFuture
 
@@ -10,10 +12,12 @@ import java.util.concurrent.CompletableFuture
  * @since 11/11/2021
  */
 class KFriendsPlayer(
-    val uniqueId: UUID,
-    var username: String
-) : Savable
+    val uniqueId: UUID
+) : Savable, IDataStoreObject
 {
+    override val identifier: UUID
+        get() = uniqueId
+
     val friends = mutableMapOf<UUID, Long>()
 
     fun orderedFriends(): List<UUID>
@@ -24,7 +28,7 @@ class KFriendsPlayer(
 
     override fun save(): CompletableFuture<Void>
     {
-        return KPlayerHandler.playerHandle
-            .saveEntry(uniqueId.toString(), this)
+        return KPlayerHandler.controller
+            .save(this, DataStoreStorageType.MONGO)
     }
 }

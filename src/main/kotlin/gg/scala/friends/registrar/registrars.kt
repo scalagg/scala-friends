@@ -1,10 +1,10 @@
-package gg.scala.friends.registrar.impl
+package gg.scala.friends.registrar
 
-import com.solexgames.datastore.commons.connection.impl.mongo.UriMongoConnection
-import com.solexgames.datastore.commons.layer.impl.MongoStorageLayer
 import gg.scala.friends.player.KFriendsPlayer
-import gg.scala.friends.registrar.ObjectRegistrar
 import gg.scala.lemon.Lemon
+import gg.scala.store.controller.DataStoreObjectController
+import gg.scala.store.controller.DataStoreObjectControllerCache
+import gg.scala.store.storage.type.DataStoreStorageType
 import me.lucko.helper.Events
 import net.evilblock.cubed.serializers.Serializers
 import org.bukkit.entity.Player
@@ -18,37 +18,22 @@ import java.util.*
  */
 object KPlayerHandler : ObjectRegistrar<UUID, KFriendsPlayer>()
 {
-    lateinit var playerHandle: MongoStorageLayer<KFriendsPlayer>
+    lateinit var controller: DataStoreObjectController<KFriendsPlayer>
+
+    override val handle: MutableMap<UUID, KFriendsPlayer>
+        get() = controller.localCache
 
     override fun initialLoad()
     {
-        MongoStorageLayer(
-            UriMongoConnection(
-                Lemon.instance.mongoConfig.uri
-            ),
-            "Scala", "friend_players",
-            KFriendsPlayer::class.java
-        ).also {
-            playerHandle = it
-            it.supplyWithCustomGson(Serializers.gson)
-        }
+        controller = DataStoreObjectControllerCache.create()
+        controller.provideCustomSerializer(Serializers.gson)
 
         Events.subscribe(AsyncPlayerPreLoginEvent::class.java).handler {
-            playerHandle.fetchEntryByKey(
-                it.uniqueId.toString()
-            ).thenAccept { player ->
-                if (player != null)
-                {
-                    insert(
-                        it.uniqueId, player.also { _ ->
-                            player.username = it.name
-                        }
-                    )
-                } else
-                {
-                    insert(it.uniqueId, KFriendsPlayer(it.uniqueId, it.name))
-                }
-            }
+            controller.loadAndCache(
+                it.uniqueId,
+                { KFriendsPlayer(it.uniqueId) },
+                DataStoreStorageType.MONGO
+            )
         }
 
         Events.subscribe(PlayerQuitEvent::class.java).handler {

@@ -1,6 +1,6 @@
 package gg.scala.friends.command
 
-import gg.scala.friends.registrar.impl.KPlayerHandler
+import gg.scala.friends.registrar.KPlayerHandler
 import gg.scala.friends.result.FriendPaginatedResult
 import gg.scala.lemon.handler.PlayerHandler
 import gg.scala.lemon.player.metadata.Metadata
@@ -43,7 +43,7 @@ class ToggleFriendInvitationCommand : BaseCommand()
                 sender = player,
                 results = friendPlayer.orderedFriends(),
                 page = page ?: 1,
-                command = "/friend list %s"
+                command = "friend list %s"
             )
         }
     }

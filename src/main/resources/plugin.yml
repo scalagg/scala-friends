@@ -1,8 +1,0 @@
-name: friends
-version: 1.0.0
-main: gg.scala.friends.FriendsSpigotPlugin
-
-author: Scala
-website: https://scala.gg
-
-depend: [Lemon, Cubed, helper, Cookie]

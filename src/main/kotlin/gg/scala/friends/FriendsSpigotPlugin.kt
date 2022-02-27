@@ -5,16 +5,10 @@ import gg.scala.banana.options.BananaOptions
 import gg.scala.commons.ExtendedScalaPlugin
 import gg.scala.cookie.Cookie
 import gg.scala.friends.handler.KFriendHandler
-import gg.scala.friends.registrar.impl.KPlayerHandler
+import gg.scala.friends.registrar.KPlayerHandler
 import gg.scala.friends.settings.FriendsSettingsImpl
 import gg.scala.lemon.Lemon
-import me.lucko.helper.Events
 import net.evilblock.cubed.command.manager.CubedCommandManager
-import net.evilblock.cubed.serializers.Serializers
-import net.evilblock.cubed.util.CC
-import org.bukkit.event.player.PlayerJoinEvent
-import java.io.InputStreamReader
-import java.net.URL
 
 /**
  * @author GrowlyX
@@ -22,7 +16,6 @@ import java.net.URL
  */
 class FriendsSpigotPlugin : ExtendedScalaPlugin()
 {
-
     override fun enable()
     {
         KPlayerHandler.initialLoad()

@@ -2,6 +2,7 @@ package gg.scala.friends.result
 
 import gg.scala.lemon.player.extension.PlayerCachingExtension
 import gg.scala.lemon.util.CubedCacheUtil
+import gg.scala.store.storage.type.DataStoreStorageType
 import net.evilblock.cubed.util.CC
 import net.evilblock.cubed.util.bukkit.PaginatedResult
 import java.util.*
@@ -18,13 +19,13 @@ object FriendPaginatedResult : PaginatedResult<UUID>()
 
         if (PlayerCachingExtension.loaded)
         {
-            val fundamental = PlayerCachingExtension.handle
-                .fetchEntryByKeySync(result.toString())
+            val fundamental = PlayerCachingExtension.controller
+                .load(result, DataStoreStorageType.REDIS).join()
             val online = fundamental != null
 
             return if (online)
             {
-                "${CC.GREEN} ● ${CC.PRI}${fundamental.username}${CC.SEC} is on ${fundamental.currentServer}."
+                "${CC.GREEN} ● ${CC.PRI}${fundamental!!.username}${CC.SEC} is on ${fundamental.currentServer}."
             } else
             {
                 "${CC.RED} ● ${CC.PRI}$username${CC.SEC} is offline."

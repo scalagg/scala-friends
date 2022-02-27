@@ -6,7 +6,7 @@ package gg.scala.friends.registrar
  */
 abstract class ObjectRegistrar<K, V> : Handler
 {
-    val handle = mutableMapOf<K, V>()
+    open val handle = mutableMapOf<K, V>()
 
     fun insert(k: K, v: V)
     {
