@@ -12,7 +12,7 @@ import java.util.concurrent.CompletableFuture
  * @since 11/11/2021
  */
 class KFriendsPlayer(
-    val uniqueId: UUID
+    private val uniqueId: UUID
 ) : Savable, IDataStoreObject
 {
     override val identifier: UUID

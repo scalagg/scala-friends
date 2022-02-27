@@ -21,7 +21,6 @@ import java.util.*
 object KPlayerHandler
 {
     lateinit var controller: DataStoreObjectController<KFriendsPlayer>
-    private val handle = controller.localCache
 
     @Configure
     fun configure()
@@ -38,10 +37,13 @@ object KPlayerHandler
         }
 
         Events.subscribe(PlayerQuitEvent::class.java).handler {
-            handle.remove(it.player.uniqueId)?.save()
+            controller.localCache.remove(it.player.uniqueId)?.save()
         }
     }
 
-    fun find(player: Player): KFriendsPlayer? = handle[player.uniqueId]
-    fun find(uniqueId: UUID): KFriendsPlayer? = handle[uniqueId]
+    fun find(player: Player): KFriendsPlayer? =
+        controller.localCache[player.uniqueId]
+
+    fun find(uniqueId: UUID): KFriendsPlayer? =
+        controller.localCache[uniqueId]
 }
