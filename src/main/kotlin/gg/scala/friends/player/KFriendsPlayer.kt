@@ -1,7 +1,7 @@
 package gg.scala.friends.player
 
 import gg.scala.common.Savable
-import gg.scala.friends.registrar.KPlayerHandler
+import gg.scala.friends.handler.KPlayerHandler
 import gg.scala.store.storage.storable.IDataStoreObject
 import gg.scala.store.storage.type.DataStoreStorageType
 import java.util.*

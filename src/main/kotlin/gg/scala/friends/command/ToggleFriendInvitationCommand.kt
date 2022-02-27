@@ -1,6 +1,6 @@
 package gg.scala.friends.command
 
-import gg.scala.friends.registrar.KPlayerHandler
+import gg.scala.friends.handler.KPlayerHandler
 import gg.scala.friends.result.FriendPaginatedResult
 import gg.scala.lemon.handler.PlayerHandler
 import gg.scala.lemon.player.metadata.Metadata

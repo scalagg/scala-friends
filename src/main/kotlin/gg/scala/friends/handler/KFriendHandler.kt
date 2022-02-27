@@ -2,16 +2,12 @@ package gg.scala.friends.handler
 
 import gg.scala.banana.annotate.Subscribe
 import gg.scala.banana.message.Message
-import gg.scala.friends.registrar.KPlayerHandler
 import gg.scala.lemon.Lemon
-import gg.scala.lemon.handler.DataStoreOrchestrator
 import gg.scala.lemon.handler.RedisHandler
-import gg.scala.lemon.player.LemonPlayer
-import gg.scala.lemon.player.extension.PlayerCachingExtension
+import gg.scala.lemon.player.wrapper.AsyncLemonPlayer
 import gg.scala.lemon.util.CubedCacheUtil
 import gg.scala.lemon.util.QuickAccess
-import gg.scala.store.controller.DataStoreObjectControllerCache
-import gg.scala.store.storage.type.DataStoreStorageType
+import gg.scala.lemon.util.QuickAccess.username
 import net.evilblock.cubed.acf.ConditionFailedException
 import net.evilblock.cubed.util.CC
 import net.evilblock.cubed.util.bukkit.Constants
@@ -67,7 +63,7 @@ object KFriendHandler
         friendPlayer.save()
     }
 
-    fun attemptDispatchFriendRequestTo(player: Player, uniqueId: UUID)
+    fun attemptDispatchFriendRequestTo(player: Player, uniqueId: UUID): CompletableFuture<Void>
     {
         val friendPlayer = KPlayerHandler.find(player)
             ?: throw RuntimeException()
@@ -84,99 +80,80 @@ object KFriendHandler
             throw ConditionFailedException("You already have ${CC.YELLOW}$username${CC.RED} added as a friend.")
         }
 
-        handlePostPlayerOnlineCheck(player, uniqueId, username)
-
-        if (PlayerCachingExtension.loaded)
-        {
-            PlayerCachingExtension.controller.load(
-                uniqueId, DataStoreStorageType.REDIS
-            ).thenAccept {
-                if (it == null)
-                {
-                    player.sendMessage("${CC.YELLOW}$username${CC.RED} is not online.")
-                    return@thenAccept
-                }
-
-                try
-                {
-                    handlePostPlayerOnlineCheck(player, uniqueId, username)
-                } catch (e: Exception)
-                {
-                    e.printStackTrace()
-                }
+        return QuickAccess.online(uniqueId).thenCompose {
+            if (it == null)
+            {
+                throw ConditionFailedException("${CC.YELLOW}$username${CC.RED} is not online.")
             }
-        } else
-        {
+
             handlePostPlayerOnlineCheck(player, uniqueId, username)
         }
     }
 
-    private fun handlePostPlayerOnlineCheck(player: Player, uniqueId: UUID, username: String)
+    private fun handlePostPlayerOnlineCheck(
+        player: Player, uniqueId: UUID, username: String
+    ): CompletableFuture<Void>
     {
-        hasOutgoingFriendRequestFrom(player.uniqueId, uniqueId).whenCompleteAsync { it, t ->
-            t?.printStackTrace()
-
+        return hasOutgoingFriendRequestFrom(player.uniqueId, uniqueId).thenCompose {
             if (it)
             {
-                player.sendMessage("${CC.RED}You've already sent a friend request to ${CC.YELLOW}$username${CC.RED}, please wait.")
-                return@whenCompleteAsync
+                throw ConditionFailedException("${CC.RED}You've already sent a friend request to ${CC.YELLOW}$username${CC.RED}, please wait.")
             }
 
-            retrieveFriendRequestStatus(uniqueId).whenComplete { disabled, t ->
-                t?.printStackTrace()
-
+            retrieveFriendRequestStatus(uniqueId).thenCompose { disabled ->
                 if (disabled)
                 {
-                    player.sendMessage("${CC.YELLOW}$username${CC.RED} has their friend requests disabled.")
-                    return@whenComplete
+                    throw ConditionFailedException("${CC.YELLOW}$username${CC.RED} has their friend requests disabled.")
                 }
 
-                try
-                {
-                    internalHandleFriendRequestDispatch(player, uniqueId, username)
-                } catch (e: Exception)
-                {
-                    e.printStackTrace()
-                }
+                internalHandleFriendRequestDispatch(player, uniqueId, username)
             }
         }
     }
 
-    private fun internalHandleFriendRequestDispatch(player: Player, uniqueId: UUID, username: String)
+    private fun internalHandleFriendRequestDispatch(
+        player: Player, uniqueId: UUID, username: String
+    ): CompletableFuture<Void>
     {
-        val message = FancyMessage()
-        message.withMessage(
-            "",
-            " ${CC.PRI}${player.name}${CC.SEC} sent you a friend request!",
-            " ${CC.B_GREEN}[CLICK TO ACCEPT]",
-            ""
-        )
-        message.andHoverOf(
-            "${CC.GREEN}Click to accept ${CC.YELLOW}${player.name}'s${CC.GREEN} friend request!"
-        )
-        message.andCommandOf(
-            ClickEvent.Action.RUN_COMMAND,
-            "/friend accept ${player.name}"
-        )
-
-        Lemon.instance.banana.useResource {
-            val requestKey = "friends:requests:$uniqueId:${player.uniqueId}"
-
-            it.hset(
-                requestKey, player.uniqueId.toString(),
-                System.currentTimeMillis().toString()
+        return CompletableFuture.runAsync {
+            val message = FancyMessage()
+            message.withMessage(
+                "",
+                " ${CC.PRI}${player.name}${CC.SEC} sent you a friend request!",
+                " ${CC.GREEN}(Click to accept)",
+                ""
             )
-            it.expire(requestKey, TimeUnit.MINUTES.toSeconds(5L))
+            message.andHoverOf(
+                "${CC.GREEN}Click to accept ${CC.YELLOW}${player.name}'s${CC.GREEN} friend request!"
+            )
+            message.andCommandOf(
+                ClickEvent.Action.RUN_COMMAND,
+                "/friend accept ${player.name}"
+            )
+
+            Lemon.instance.banana.useResource {
+                val requestKey = "friends:requests:$uniqueId:${player.uniqueId}"
+
+                it.hset(
+                    requestKey, player.uniqueId.toString(),
+                    System.currentTimeMillis().toString()
+                )
+
+                it.expire(
+                    requestKey,
+                    TimeUnit.MINUTES.toSeconds(5L)
+                )
+            }
+
+            QuickAccess.sendGlobalPlayerFancyMessage(
+                fancyMessage = message, uuid = uniqueId
+            )
+
+            player.sendMessage("${CC.GREEN}You've sent a friend request to ${CC.YELLOW}$username${CC.GREEN}!")
         }
-
-        QuickAccess.sendGlobalPlayerFancyMessage(
-            fancyMessage = message, uuid = uniqueId
-        )
-
-        player.sendMessage("${CC.GREEN}You've sent a friend request to ${CC.YELLOW}$username${CC.GREEN}!")
     }
 
-    fun attemptFriendRequestAcceptFrom(player: Player, uniqueId: UUID)
+    fun attemptFriendRequestAcceptFrom(player: Player, uniqueId: UUID): CompletableFuture<Void>
     {
         val friendPlayer = KPlayerHandler.find(player)
             ?: throw RuntimeException()
@@ -193,43 +170,46 @@ object KFriendHandler
             throw ConditionFailedException("You already have ${CC.YELLOW}$username${CC.RED} added as a friend.")
         }
 
-        hasOutgoingFriendRequestFrom(uniqueId, player.uniqueId).thenAccept {
+        return hasOutgoingFriendRequestFrom(uniqueId, player.uniqueId).thenCompose {
             if (!it)
             {
-                player.sendMessage("${CC.RED}You don't have a friend request from ${CC.YELLOW}$username${CC.RED}.")
-                return@thenAccept
+                throw ConditionFailedException("${CC.RED}You don't have a friend request from ${CC.YELLOW}$username${CC.RED}.")
             }
 
             internalHandleFriendRequestAccept(player, uniqueId, username)
         }
     }
 
-    private fun internalHandleFriendRequestAccept(player: Player, uniqueId: UUID, username: String)
+    private fun internalHandleFriendRequestAccept(
+        player: Player, uniqueId: UUID, username: String
+    ): CompletableFuture<Void>
     {
-        val friendPlayer = KPlayerHandler.find(player)
-            ?: throw RuntimeException()
+        return CompletableFuture.runAsync {
+            val friendPlayer = KPlayerHandler.find(player)
+                ?: throw RuntimeException()
 
-        friendPlayer.friends[uniqueId] = System.currentTimeMillis()
-        friendPlayer.save()
+            friendPlayer.friends[uniqueId] = System.currentTimeMillis()
+            friendPlayer.save()
 
-        Lemon.instance.banana.useResource {
-            it.hdel("friends:requests:${player.uniqueId}:$uniqueId", uniqueId.toString())
+            Lemon.instance.banana.useResource {
+                it.hdel("friends:requests:${player.uniqueId}:$uniqueId", uniqueId.toString())
+            }
+
+            RedisHandler.buildMessage(
+                packet = "friend-request-accept",
+                "uniqueId" to uniqueId.toString(),
+                "friend" to player.uniqueId.toString(),
+            ).dispatch(
+                "friends", Lemon.instance.banana
+            )
+
+            QuickAccess.sendGlobalPlayerMessage(
+                message = "${CC.GREEN}Your friend request to ${CC.PRI}${player.name}${CC.GREEN} has been accepted!",
+                uuid = uniqueId
+            )
+
+            player.sendMessage("${CC.SEC}You've accepted ${CC.PRI}$username's${CC.SEC} friend request.")
         }
-
-        RedisHandler.buildMessage(
-            packet = "friend-request-accept",
-            "uniqueId" to uniqueId.toString(),
-            "friend" to player.uniqueId.toString(),
-        ).dispatch(
-            "friends", Lemon.instance.banana
-        )
-
-        QuickAccess.sendGlobalPlayerMessage(
-            message = "${CC.GREEN}Your friend request to ${CC.PRI}${player.name}${CC.GREEN} has been accepted!",
-            uuid = uniqueId
-        )
-
-        player.sendMessage("${CC.SEC}You've accepted ${CC.PRI}$username's${CC.SEC} friend request.")
     }
 
     fun attemptFriendRemoval(player: Player, uniqueId: UUID)
@@ -268,36 +248,27 @@ object KFriendHandler
 
     private fun retrieveFriendRequestStatus(uniqueId: UUID): CompletableFuture<Boolean>
     {
-        return DataStoreObjectControllerCache.findNotNull<LemonPlayer>()
-            .load(uniqueId, DataStoreStorageType.MONGO).thenApply {
-                try
+        return AsyncLemonPlayer.of(uniqueId).future
+            .thenApply {
+                if (it == null)
                 {
-                    return@thenApply it?.getSetting("friend-requests-disabled") ?: false
-                } catch (e: Exception)
-                {
-                    e.printStackTrace()
-                    return@thenApply false
+                    throw ConditionFailedException("${CC.YELLOW}${uniqueId.username()}${CC.RED} has never logged on the server.")
                 }
+
+                it.getSetting("party-invites-disabled")
             }
     }
 
     private fun hasOutgoingFriendRequestFrom(requester: UUID, target: UUID): CompletableFuture<Boolean>
     {
         return CompletableFuture.supplyAsync {
-            try
-            {
-                var exists = false
+            var exists = false
 
-                Lemon.instance.banana.useResource {
-                    exists = it.hget("friends:requests:$target:$requester", requester.toString()) != null
-                }
-
-                return@supplyAsync exists
-            } catch (e: Exception)
-            {
-                e.printStackTrace()
-                return@supplyAsync false
+            Lemon.instance.banana.useResource {
+                exists = it.hget("friends:requests:$target:$requester", requester.toString()) != null
             }
+
+            exists
         }
     }
 }

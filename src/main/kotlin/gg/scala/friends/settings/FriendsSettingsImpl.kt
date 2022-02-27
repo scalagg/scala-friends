@@ -21,7 +21,7 @@ object FriendsSettingsImpl : PlayerSettings()
                     "Would you like to",
                     "receive friend requests?"
                 )
-                .materialOf(XMaterial.BLAZE_SPAWN_EGG)
+                .materialOf(XMaterial.BAKED_POTATO)
                 .settingOf("friend-requests-disabled")
                 .asButton()
         )

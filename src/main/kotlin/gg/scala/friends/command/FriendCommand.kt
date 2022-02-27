@@ -1,7 +1,7 @@
 package gg.scala.friends.command
 
 import gg.scala.friends.handler.KFriendHandler
-import gg.scala.friends.registrar.KPlayerHandler
+import gg.scala.friends.handler.KPlayerHandler
 import gg.scala.friends.result.FriendPaginatedResult
 import net.evilblock.cubed.acf.BaseCommand
 import net.evilblock.cubed.acf.CommandHelp
@@ -9,6 +9,7 @@ import net.evilblock.cubed.acf.annotation.*
 import net.evilblock.cubed.acf.annotation.Optional
 import org.bukkit.entity.Player
 import java.util.*
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ForkJoinPool
 
 /**
@@ -47,9 +48,9 @@ class FriendCommand : BaseCommand()
     @Syntax("<player>")
     @CommandCompletion("@all-players")
     @Description("Send a friend request to a player.")
-    fun onAdd(player: Player, target: UUID)
+    fun onAdd(player: Player, target: UUID): CompletableFuture<Void>
     {
-        KFriendHandler.attemptDispatchFriendRequestTo(player, target)
+        return KFriendHandler.attemptDispatchFriendRequestTo(player, target)
     }
 
     @Syntax("<player>")

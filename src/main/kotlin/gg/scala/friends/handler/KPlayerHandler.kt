@@ -1,7 +1,8 @@
-package gg.scala.friends.registrar
+package gg.scala.friends.handler
 
+import gg.scala.flavor.service.Configure
+import gg.scala.flavor.service.Service
 import gg.scala.friends.player.KFriendsPlayer
-import gg.scala.lemon.Lemon
 import gg.scala.store.controller.DataStoreObjectController
 import gg.scala.store.controller.DataStoreObjectControllerCache
 import gg.scala.store.storage.type.DataStoreStorageType
@@ -16,14 +17,14 @@ import java.util.*
  * @author GrowlyX
  * @since 11/10/2021
  */
-object KPlayerHandler : ObjectRegistrar<UUID, KFriendsPlayer>()
+@Service
+object KPlayerHandler
 {
     lateinit var controller: DataStoreObjectController<KFriendsPlayer>
+    private val handle = controller.localCache
 
-    override val handle: MutableMap<UUID, KFriendsPlayer>
-        get() = controller.localCache
-
-    override fun initialLoad()
+    @Configure
+    fun configure()
     {
         controller = DataStoreObjectControllerCache.create()
         controller.provideCustomSerializer(Serializers.gson)
@@ -37,9 +38,10 @@ object KPlayerHandler : ObjectRegistrar<UUID, KFriendsPlayer>()
         }
 
         Events.subscribe(PlayerQuitEvent::class.java).handler {
-            delete(it.player.uniqueId)?.save()
+            handle.remove(it.player.uniqueId)?.save()
         }
     }
 
     fun find(player: Player): KFriendsPlayer? = handle[player.uniqueId]
+    fun find(uniqueId: UUID): KFriendsPlayer? = handle[uniqueId]
 }
