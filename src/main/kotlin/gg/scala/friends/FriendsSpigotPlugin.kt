@@ -2,6 +2,7 @@ package gg.scala.friends
 
 import gg.scala.banana.Banana
 import gg.scala.banana.options.BananaOptions
+import gg.scala.cloudsync.shared.discovery.CloudSyncDiscoveryService
 import gg.scala.commons.ExtendedScalaPlugin
 import gg.scala.cookie.Cookie
 import gg.scala.friends.handler.KFriendHandler
@@ -25,6 +26,7 @@ import org.bukkit.ChatColor
         PluginDependency("Cookie"),
         PluginDependency("helper"),
         PluginDependency("store-spigot"),
+        PluginDependency("cloudsync"),
     ]
 )
 class FriendsSpigotPlugin : ExtendedScalaPlugin()
@@ -38,6 +40,12 @@ class FriendsSpigotPlugin : ExtendedScalaPlugin()
 
         Cookie.instance.playerSettings
             .add(FriendsSettingsImpl)
+
+        CloudSyncDiscoveryService
+            .discoverable.assets
+            .apply {
+                add("gg.scala.friends:friends:friends")
+            }
     }
 
     private fun registerBananaHandlers()
@@ -61,5 +69,6 @@ class FriendsSpigotPlugin : ExtendedScalaPlugin()
         )
 
         Lemon.instance.registerCompletionsAndContexts(manager)
+        Lemon.instance.registerCommandsInPackage(manager, "gg.scala.friends.command")
     }
 }

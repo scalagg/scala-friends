@@ -5,6 +5,7 @@ import gg.scala.flavor.service.Service
 import gg.scala.friends.player.KFriendsPlayer
 import gg.scala.store.controller.DataStoreObjectController
 import gg.scala.store.controller.DataStoreObjectControllerCache
+import gg.scala.store.storage.impl.CachedDataStoreStorageLayer
 import gg.scala.store.storage.type.DataStoreStorageType
 import me.lucko.helper.Events
 import net.evilblock.cubed.serializers.Serializers
@@ -12,6 +13,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * @author GrowlyX
@@ -22,11 +24,17 @@ object KPlayerHandler
 {
     lateinit var controller: DataStoreObjectController<KFriendsPlayer>
 
+    private val players: ConcurrentHashMap<UUID, KFriendsPlayer>
+        get() = controller.useLayerWithReturn<CachedDataStoreStorageLayer<KFriendsPlayer>, ConcurrentHashMap<UUID, KFriendsPlayer>>(
+            DataStoreStorageType.CACHE
+        ) {
+            this.connection.getConnection()
+        }
+
     @Configure
     fun configure()
     {
         controller = DataStoreObjectControllerCache.create()
-        controller.provideCustomSerializer(Serializers.gson)
 
         Events.subscribe(AsyncPlayerPreLoginEvent::class.java).handler {
             controller.loadAndCache(
@@ -37,13 +45,13 @@ object KPlayerHandler
         }
 
         Events.subscribe(PlayerQuitEvent::class.java).handler {
-            controller.localCache.remove(it.player.uniqueId)?.save()
+            players.remove(it.player.uniqueId)?.save()
         }
     }
 
     fun find(player: Player): KFriendsPlayer? =
-        controller.localCache[player.uniqueId]
+        players[player.uniqueId]
 
     fun find(uniqueId: UUID): KFriendsPlayer? =
-        controller.localCache[uniqueId]
+        players[uniqueId]
 }

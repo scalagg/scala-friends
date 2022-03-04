@@ -38,7 +38,7 @@ object KFriendHandler
 
             if (friendPlayer.friends[uniqueId] != null)
             {
-                player.sendMessage("${CC.B_PRI}Friends ${CC.GRAY}${Constants.DOUBLE_ARROW_RIGHT} ${CC.PRI}$username ${CC.SEC}$type.")
+                player.sendMessage("${CC.BD_AQUA}Friends ${CC.GRAY}${Constants.DOUBLE_ARROW_RIGHT} ${CC.PRI}$username ${CC.SEC}$type.")
             }
         }
     }
@@ -240,7 +240,8 @@ object KFriendHandler
             "uniqueId" to uniqueId.toString(),
             "friend" to player.uniqueId.toString(),
         ).dispatch(
-            "friends", Lemon.instance.banana
+            "friends",
+            Lemon.instance.banana
         )
 
         player.sendMessage("${CC.SEC}You've removed ${CC.PRI}$username${CC.SEC} from your friends list.")
