@@ -24,13 +24,6 @@ object KPlayerHandler
 {
     lateinit var controller: DataStoreObjectController<KFriendsPlayer>
 
-    private val players: ConcurrentHashMap<UUID, KFriendsPlayer>
-        get() = controller.useLayerWithReturn<CachedDataStoreStorageLayer<KFriendsPlayer>, ConcurrentHashMap<UUID, KFriendsPlayer>>(
-            DataStoreStorageType.CACHE
-        ) {
-            this.connection.getConnection()
-        }
-
     @Configure
     fun configure()
     {
@@ -45,13 +38,13 @@ object KPlayerHandler
         }
 
         Events.subscribe(PlayerQuitEvent::class.java).handler {
-            players.remove(it.player.uniqueId)?.save()
+            controller.localCache().remove(it.player.uniqueId)?.save()
         }
     }
 
     fun find(player: Player): KFriendsPlayer? =
-        players[player.uniqueId]
+        controller.localCache()[player.uniqueId]
 
     fun find(uniqueId: UUID): KFriendsPlayer? =
-        players[uniqueId]
+        controller.localCache()[uniqueId]
 }

@@ -1,7 +1,8 @@
 package gg.scala.friends
 
-import gg.scala.banana.Banana
-import gg.scala.banana.options.BananaOptions
+import gg.scala.aware.AwareBuilder
+import gg.scala.aware.codec.codecs.interpretation.AwareMessageCodec
+import gg.scala.aware.message.AwareMessage
 import gg.scala.cloudsync.shared.discovery.CloudSyncDiscoveryService
 import gg.scala.commons.ExtendedScalaPlugin
 import gg.scala.cookie.Cookie
@@ -48,16 +49,23 @@ class FriendsSpigotPlugin : ExtendedScalaPlugin()
             }
     }
 
+    private val aware by lazy {
+        AwareBuilder
+            .of<AwareMessage>("friends")
+            .codec(AwareMessageCodec)
+            .logger(logger)
+            .build()
+    }
+
     private fun registerBananaHandlers()
     {
-        val banana = Banana(
-            Lemon.instance.credentials,
-            BananaOptions(
-                "friends"
-            )
-        )
-        banana.registerClass(KFriendHandler)
-        banana.subscribe()
+        aware.listen(KFriendHandler)
+        aware.connect()
+    }
+
+    override fun disable()
+    {
+        aware.shutdown()
     }
 
     private fun registerAcfCommands()

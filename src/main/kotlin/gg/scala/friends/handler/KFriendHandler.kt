@@ -1,13 +1,14 @@
 package gg.scala.friends.handler
 
-import gg.scala.banana.annotate.Subscribe
-import gg.scala.banana.message.Message
+import gg.scala.aware.annotation.Subscribe
+import gg.scala.aware.message.AwareMessage
 import gg.scala.lemon.Lemon
 import gg.scala.lemon.handler.RedisHandler
 import gg.scala.lemon.player.wrapper.AsyncLemonPlayer
 import gg.scala.lemon.util.CubedCacheUtil
 import gg.scala.lemon.util.QuickAccess
 import gg.scala.lemon.util.QuickAccess.username
+import io.lettuce.core.api.StatefulRedisConnection
 import net.evilblock.cubed.acf.ConditionFailedException
 import net.evilblock.cubed.util.CC
 import net.evilblock.cubed.util.bukkit.Constants
@@ -26,11 +27,12 @@ import java.util.concurrent.TimeUnit
 object KFriendHandler
 {
     @Subscribe("friend-network-update")
-    fun subscribeOnFriendNetworkUpdate(message: Message)
+    fun subscribeOnFriendNetworkUpdate(message: AwareMessage)
     {
-        val uniqueId = UUID.fromString(message["uniqueId"]!!)
+        val uniqueId = message.retrieve<UUID>("uniqueId")
+
         val username = CubedCacheUtil.fetchName(uniqueId)!!
-        val type = message["type"]!!
+        val type = message.retrieve<String>("type")
 
         for (player in Bukkit.getOnlinePlayers())
         {
@@ -44,22 +46,24 @@ object KFriendHandler
     }
 
     @Subscribe("friend-request-accept")
-    fun subscribeOnFriendRequestAccept(message: Message)
+    fun subscribeOnFriendRequestAccept(message: AwareMessage)
     {
-        val uniqueId = UUID.fromString(message["uniqueId"]!!)
+        val uniqueId = message.retrieve<UUID>("uniqueId")
         val friendPlayer = KPlayerHandler.find(uniqueId) ?: return
 
-        friendPlayer.friends[UUID.fromString(message["friend"]!!)] = System.currentTimeMillis()
+        friendPlayer.friends[message.retrieve("friend")] = System.currentTimeMillis()
         friendPlayer.save()
     }
 
     @Subscribe("friend-request-removal")
-    fun subscribeOnFriendRequestRemoval(message: Message)
+    fun subscribeOnFriendRequestRemoval(message: AwareMessage)
     {
-        val uniqueId = UUID.fromString(message["uniqueId"]!!)
+        val uniqueId = message.retrieve<UUID>("uniqueId")
         val friendPlayer = KPlayerHandler.find(uniqueId) ?: return
 
-        friendPlayer.friends.remove(UUID.fromString(message["friend"]!!))
+        friendPlayer.friends.remove(
+            message.retrieve("friend")
+        )
         friendPlayer.save()
     }
 
@@ -111,6 +115,11 @@ object KFriendHandler
         }
     }
 
+    private val cacheConn: StatefulRedisConnection<String, String> by lazy {
+        Lemon.instance.aware
+            .internal().connect()
+    }
+
     private fun internalHandleFriendRequestDispatch(
         player: Player, uniqueId: UUID, username: String
     ): CompletableFuture<Void>
@@ -131,15 +140,16 @@ object KFriendHandler
                 "/friend accept ${player.name}"
             )
 
-            Lemon.instance.banana.useResource {
-                val requestKey = "friends:requests:$uniqueId:${player.uniqueId}"
+            Lemon.instance.aware.internal().apply {
+                val requestKey =
+                    "friends:requests:$uniqueId:${player.uniqueId}"
 
-                it.hset(
+                cacheConn.sync().hset(
                     requestKey, player.uniqueId.toString(),
                     System.currentTimeMillis().toString()
                 )
 
-                it.expire(
+                cacheConn.sync().expire(
                     requestKey,
                     TimeUnit.MINUTES.toSeconds(5L)
                 )
@@ -191,16 +201,16 @@ object KFriendHandler
             friendPlayer.friends[uniqueId] = System.currentTimeMillis()
             friendPlayer.save()
 
-            Lemon.instance.banana.useResource {
-                it.hdel("friends:requests:${player.uniqueId}:$uniqueId", uniqueId.toString())
+            cacheConn.apply {
+                sync().hdel("friends:requests:${player.uniqueId}:$uniqueId", uniqueId.toString())
             }
 
             RedisHandler.buildMessage(
                 packet = "friend-request-accept",
                 "uniqueId" to uniqueId.toString(),
                 "friend" to player.uniqueId.toString(),
-            ).dispatch(
-                "friends", Lemon.instance.banana
+            ).publish(
+                channel = "friends"
             )
 
             QuickAccess.sendGlobalPlayerMessage(
@@ -239,9 +249,8 @@ object KFriendHandler
             packet = "friend-request-removal",
             "uniqueId" to uniqueId.toString(),
             "friend" to player.uniqueId.toString(),
-        ).dispatch(
-            "friends",
-            Lemon.instance.banana
+        ).publish(
+            channel = "friends"
         )
 
         player.sendMessage("${CC.SEC}You've removed ${CC.PRI}$username${CC.SEC} from your friends list.")
@@ -263,10 +272,11 @@ object KFriendHandler
     private fun hasOutgoingFriendRequestFrom(requester: UUID, target: UUID): CompletableFuture<Boolean>
     {
         return CompletableFuture.supplyAsync {
-            var exists = false
+            var exists: Boolean
 
-            Lemon.instance.banana.useResource {
-                exists = it.hget("friends:requests:$target:$requester", requester.toString()) != null
+            cacheConn.apply {
+                exists = sync()
+                    .hget("friends:requests:$target:$requester", requester.toString()) != null
             }
 
             exists
