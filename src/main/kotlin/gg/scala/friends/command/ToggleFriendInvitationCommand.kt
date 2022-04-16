@@ -19,17 +19,24 @@ import java.util.concurrent.ForkJoinPool
 @AutoRegister
 class ToggleFriendInvitationCommand : ScalaCommand()
 {
-    @CommandAlias("togglefriendinvitations|tfi|tfr|togglefriendrequests|togglefriendinvites")
+    @CommandAlias("togglefriendinvitations|togglefriendrequests|togglefriendinvites|tfi|tfr")
     fun onToggleFriendRequests(player: Player)
     {
-        val lemonPlayer = PlayerHandler.findPlayer(player).orElse(null)
-        val friendsRequests = lemonPlayer.getSetting("friend-requests-disabled")
+        val lemonPlayer = PlayerHandler
+            .find(player.uniqueId)!!
+
+        val friendsRequests = lemonPlayer
+            .getSetting("friend-requests-disabled")
 
         if (friendsRequests) {
             lemonPlayer remove "friend-requests-disabled"
+
             player.sendMessage("${CC.GREEN}You've enabled friend invitations.")
         } else {
-            lemonPlayer.updateOrAddMetadata("friend-requests-disabled", Metadata(true))
+            lemonPlayer.updateOrAddMetadata(
+                "friend-requests-disabled", Metadata(true)
+            )
+
             player.sendMessage("${CC.RED}You've disabled friend invitations.")
         }
     }

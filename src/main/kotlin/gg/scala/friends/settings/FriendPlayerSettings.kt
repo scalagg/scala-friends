@@ -4,7 +4,6 @@ import com.cryptomorin.xseries.XMaterial
 import gg.scala.cookie.settings.PlayerSettings
 import gg.scala.cookie.settings.annotation.RegisterPlayerSettings
 import gg.scala.cookie.settings.builder.BooleanPlayerSettingsBuilder
-import net.evilblock.cubed.menu.Button
 import org.bukkit.entity.Player
 
 /**
@@ -12,11 +11,10 @@ import org.bukkit.entity.Player
  * @since 11/11/2021
  */
 @RegisterPlayerSettings
-object FriendsSettingsImpl : PlayerSettings()
+object FriendPlayerSettings : PlayerSettings()
 {
-    override fun getButtons(player: Player): Map<Int, Button>
-    {
-        return mutableMapOf(
+    override fun getButtons(player: Player) =
+        mutableMapOf(
             0 to BooleanPlayerSettingsBuilder()
                 .titleOf("Friend Requests")
                 .descriptionOf(
@@ -27,7 +25,6 @@ object FriendsSettingsImpl : PlayerSettings()
                 .settingOf("friend-requests-disabled")
                 .asButton()
         )
-    }
 
-    override fun hasPermission(player: Player): Boolean = true
+    override fun hasPermission(player: Player) = true
 }
