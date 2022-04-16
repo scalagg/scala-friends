@@ -258,14 +258,14 @@ object KFriendHandler
 
     private fun retrieveFriendRequestStatus(uniqueId: UUID): CompletableFuture<Boolean>
     {
-        return AsyncLemonPlayer.of(uniqueId).future
+        return AsyncLemonPlayer.of(uniqueId, false).future
             .thenApply {
-                if (it == null)
+                if (it.isEmpty())
                 {
                     throw ConditionFailedException("${CC.YELLOW}${uniqueId.username()}${CC.RED} has never logged on the server.")
                 }
 
-                it.getSetting("party-invites-disabled")
+                it[0].getSetting("party-invites-disabled")
             }
     }
 

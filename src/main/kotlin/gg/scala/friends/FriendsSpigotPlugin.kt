@@ -5,15 +5,11 @@ import gg.scala.aware.codec.codecs.interpretation.AwareMessageCodec
 import gg.scala.aware.message.AwareMessage
 import gg.scala.cloudsync.shared.discovery.CloudSyncDiscoveryService
 import gg.scala.commons.ExtendedScalaPlugin
-import gg.scala.cookie.Cookie
+import gg.scala.commons.annotations.container.ContainerDisable
+import gg.scala.commons.annotations.container.ContainerEnable
 import gg.scala.friends.handler.KFriendHandler
-import gg.scala.friends.handler.KPlayerHandler
-import gg.scala.friends.settings.FriendsSettingsImpl
-import gg.scala.lemon.Lemon
 import me.lucko.helper.plugin.ap.Plugin
 import me.lucko.helper.plugin.ap.PluginDependency
-import net.evilblock.cubed.command.manager.CubedCommandManager
-import org.bukkit.ChatColor
 
 /**
  * @author GrowlyX
@@ -21,34 +17,18 @@ import org.bukkit.ChatColor
  */
 @Plugin(
     name = "Friends",
+    apiVersion = "1.18",
     depends = [
         PluginDependency("Cubed"),
         PluginDependency("Lemon"),
         PluginDependency("Cookie"),
         PluginDependency("helper"),
         PluginDependency("store-spigot"),
-        PluginDependency("cloudsync"),
+        PluginDependency("cloudsync")
     ]
 )
 class FriendsSpigotPlugin : ExtendedScalaPlugin()
 {
-    override fun enable()
-    {
-        KPlayerHandler.configure()
-
-        registerBananaHandlers()
-        registerAcfCommands()
-
-        Cookie.instance.playerSettings
-            .add(FriendsSettingsImpl)
-
-        CloudSyncDiscoveryService
-            .discoverable.assets
-            .apply {
-                add("gg.scala.friends:friends:friends")
-            }
-    }
-
     private val aware by lazy {
         AwareBuilder
             .of<AwareMessage>("friends")
@@ -57,26 +37,23 @@ class FriendsSpigotPlugin : ExtendedScalaPlugin()
             .build()
     }
 
-    private fun registerBananaHandlers()
+    @ContainerEnable
+    fun containerEnable()
     {
-        aware.listen(KFriendHandler)
-        aware.connect()
+        this.aware.listen(KFriendHandler)
+        this.aware.connect()
+            .toCompletableFuture().join()
+
+        CloudSyncDiscoveryService
+            .discoverable.assets
+            .apply {
+                add("gg.scala.friends:friends:friends")
+            }
     }
 
-    override fun disable()
+    @ContainerDisable
+    fun containerDisable()
     {
-        aware.shutdown()
-    }
-
-    private fun registerAcfCommands()
-    {
-        val manager = CubedCommandManager(
-            plugin = this,
-            primary = ChatColor.valueOf(Lemon.instance.lemonWebData.primary),
-            secondary = ChatColor.valueOf(Lemon.instance.lemonWebData.secondary)
-        )
-
-        Lemon.instance.registerCompletionsAndContexts(manager)
-        Lemon.instance.registerCommandsInPackage(manager, "gg.scala.friends.command")
+        this.aware.shutdown()
     }
 }

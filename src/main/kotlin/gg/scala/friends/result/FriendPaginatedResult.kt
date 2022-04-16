@@ -28,5 +28,6 @@ object FriendPaginatedResult : PaginatedResult<UUID>()
         }
     }
 
-    override fun getHeader(page: Int, maxPages: Int): String = "${CC.PRI}=== ${CC.SEC}Your Friends ${CC.GRAY}($page/$maxPages) ${CC.PRI}==="
+    override fun getHeader(page: Int, maxPages: Int) =
+        "${CC.PRI}=== ${CC.SEC}Your Friends ${CC.GRAY}($page/$maxPages) ${CC.PRI}==="
 }

@@ -1,9 +1,10 @@
 package gg.scala.friends.command
 
+import gg.scala.commons.annotations.commands.AutoRegister
+import gg.scala.commons.command.ScalaCommand
 import gg.scala.friends.handler.KFriendHandler
 import gg.scala.friends.handler.KPlayerHandler
 import gg.scala.friends.result.FriendPaginatedResult
-import net.evilblock.cubed.acf.BaseCommand
 import net.evilblock.cubed.acf.CommandHelp
 import net.evilblock.cubed.acf.annotation.*
 import net.evilblock.cubed.acf.annotation.Optional
@@ -16,8 +17,9 @@ import java.util.concurrent.ForkJoinPool
  * @author GrowlyX
  * @since 11/11/2021
  */
+@AutoRegister
 @CommandAlias("friend|friends|fr|f")
-class FriendCommand : BaseCommand()
+class FriendCommand : ScalaCommand()
 {
     @Default
     @HelpCommand

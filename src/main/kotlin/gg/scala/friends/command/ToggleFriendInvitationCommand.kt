@@ -1,10 +1,11 @@
 package gg.scala.friends.command
 
+import gg.scala.commons.annotations.commands.AutoRegister
+import gg.scala.commons.command.ScalaCommand
 import gg.scala.friends.handler.KPlayerHandler
 import gg.scala.friends.result.FriendPaginatedResult
 import gg.scala.lemon.handler.PlayerHandler
 import gg.scala.lemon.player.metadata.Metadata
-import net.evilblock.cubed.acf.BaseCommand
 import net.evilblock.cubed.acf.annotation.CommandAlias
 import net.evilblock.cubed.acf.annotation.Optional
 import net.evilblock.cubed.util.CC
@@ -15,7 +16,8 @@ import java.util.concurrent.ForkJoinPool
  * @author GrowlyX
  * @since 11/12/2021
  */
-class ToggleFriendInvitationCommand : BaseCommand()
+@AutoRegister
+class ToggleFriendInvitationCommand : ScalaCommand()
 {
     @CommandAlias("togglefriendinvitations|tfi|tfr|togglefriendrequests|togglefriendinvites")
     fun onToggleFriendRequests(player: Player)
