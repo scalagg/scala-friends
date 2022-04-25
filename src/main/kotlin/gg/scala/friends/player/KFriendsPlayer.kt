@@ -2,6 +2,8 @@ package gg.scala.friends.player
 
 import gg.scala.common.Savable
 import gg.scala.friends.handler.KPlayerHandler
+import gg.scala.store.controller.DataStoreObjectControllerCache
+import gg.scala.store.controller.annotations.Timestamp
 import gg.scala.store.storage.storable.IDataStoreObject
 import gg.scala.store.storage.type.DataStoreStorageType
 import java.util.*
@@ -15,6 +17,10 @@ class KFriendsPlayer(
     private val uniqueId: UUID
 ) : Savable, IDataStoreObject
 {
+    @JvmField
+    @Timestamp
+    var timestamp = 0L
+
     override val identifier: UUID
         get() = uniqueId
 
@@ -28,7 +34,8 @@ class KFriendsPlayer(
 
     override fun save(): CompletableFuture<Void>
     {
-        return KPlayerHandler.controller
+        return DataStoreObjectControllerCache
+            .findNotNull<KFriendsPlayer>()
             .save(this, DataStoreStorageType.MONGO)
     }
 }
