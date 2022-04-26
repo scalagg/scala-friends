@@ -3,7 +3,6 @@ package gg.scala.friends
 import gg.scala.aware.AwareBuilder
 import gg.scala.aware.codec.codecs.interpretation.AwareMessageCodec
 import gg.scala.aware.message.AwareMessage
-import gg.scala.cloudsync.shared.discovery.CloudSyncDiscoveryService
 import gg.scala.commons.ExtendedScalaPlugin
 import gg.scala.commons.annotations.container.ContainerDisable
 import gg.scala.commons.annotations.container.ContainerEnable
@@ -23,8 +22,7 @@ import me.lucko.helper.plugin.ap.PluginDependency
         PluginDependency("Lemon"),
         PluginDependency("Cookie"),
         PluginDependency("helper"),
-        PluginDependency("store-spigot"),
-        PluginDependency("cloudsync")
+        PluginDependency("store-spigot")
     ]
 )
 class FriendsSpigotPlugin : ExtendedScalaPlugin()
@@ -43,12 +41,6 @@ class FriendsSpigotPlugin : ExtendedScalaPlugin()
         this.aware.listen(KFriendHandler)
         this.aware.connect()
             .toCompletableFuture().join()
-
-        CloudSyncDiscoveryService
-            .discoverable.assets
-            .apply {
-                add("gg.scala.friends:friends:friends")
-            }
     }
 
     @ContainerDisable
