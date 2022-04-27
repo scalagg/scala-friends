@@ -21,7 +21,6 @@ import me.lucko.helper.plugin.ap.PluginDependency
         PluginDependency("scala-commons"),
         PluginDependency("Lemon"),
         PluginDependency("Cookie"),
-        PluginDependency("helper"),
         PluginDependency("store-spigot"),
         PluginDependency("cloudsync", soft = true)
     ]
