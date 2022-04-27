@@ -18,7 +18,7 @@ import me.lucko.helper.plugin.ap.PluginDependency
     name = "Friends",
     apiVersion = "1.18",
     depends = [
-        PluginDependency("Cubed"),
+        PluginDependency("scala-commons"),
         PluginDependency("Lemon"),
         PluginDependency("Cookie"),
         PluginDependency("helper"),
