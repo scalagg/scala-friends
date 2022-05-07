@@ -4,6 +4,7 @@ import com.cryptomorin.xseries.XMaterial
 import gg.scala.cookie.settings.PlayerSettings
 import gg.scala.cookie.settings.annotation.RegisterPlayerSettings
 import gg.scala.cookie.settings.builder.BooleanPlayerSettingsBuilder
+import net.evilblock.cubed.util.CC
 import org.bukkit.entity.Player
 
 /**
@@ -25,6 +26,11 @@ object FriendPlayerSettings : PlayerSettings()
                 .settingOf("friend-requests-disabled")
                 .asButton()
         )
+
+    override fun identifier() = "Friends"
+    override fun description() = listOf(
+        "${CC.GRAY}Friend privacy, spam, and other options."
+    )
 
     override fun hasPermission(player: Player) = true
 }

@@ -5,9 +5,9 @@ import gg.scala.commons.command.ScalaCommand
 import gg.scala.friends.handler.KFriendHandler
 import gg.scala.friends.handler.KPlayerHandler
 import gg.scala.friends.result.FriendPaginatedResult
-import net.evilblock.cubed.acf.CommandHelp
-import net.evilblock.cubed.acf.annotation.*
-import net.evilblock.cubed.acf.annotation.Optional
+import gg.scala.commons.acf.CommandHelp
+import gg.scala.commons.acf.annotation.*
+import gg.scala.commons.acf.annotation.Optional
 import org.bukkit.entity.Player
 import java.util.*
 import java.util.concurrent.CompletableFuture
