@@ -21,7 +21,7 @@ object CloudSyncFeature
         CloudSyncDiscoveryService
             .discoverable.assets
             .apply {
-                add("gg.scala.cookie:Cookie:Cookie")
+                add("gg.scala.friends:friends:friends")
             }
     }
 }
