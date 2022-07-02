@@ -31,7 +31,10 @@ object KFriendHandler
     {
         val uniqueId = message.retrieve<UUID>("uniqueId")
 
-        val username = CubedCacheUtil.fetchName(uniqueId)!!
+        val username = CubedCacheUtil
+            .fetchName(uniqueId)
+            ?: return
+
         val type = message.retrieve<String>("type")
 
         for (player in Bukkit.getOnlinePlayers())
@@ -40,7 +43,7 @@ object KFriendHandler
 
             if (friendPlayer.friends[uniqueId] != null)
             {
-                player.sendMessage("${CC.BD_AQUA}Friends ${CC.GRAY}${Constants.DOUBLE_ARROW_RIGHT} ${CC.PRI}$username ${CC.SEC}$type.")
+                player.sendMessage("${CC.B_GOLD}Friends ${CC.GRAY}${Constants.DOUBLE_ARROW_RIGHT} ${CC.PRI}$username ${CC.SEC}$type.")
             }
         }
     }
