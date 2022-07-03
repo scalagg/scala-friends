@@ -8,6 +8,7 @@ import gg.scala.friends.result.FriendPaginatedResult
 import gg.scala.commons.acf.CommandHelp
 import gg.scala.commons.acf.annotation.*
 import gg.scala.commons.acf.annotation.Optional
+import gg.scala.friends.menu.FriendsMenu
 import org.bukkit.entity.Player
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -22,7 +23,13 @@ import java.util.concurrent.ForkJoinPool
 class FriendCommand : ScalaCommand()
 {
     @Default
+    fun onFriends(player: Player)
+    {
+        FriendsMenu().openMenu(player)
+    }
+
     @HelpCommand
+    @Subcommand("help")
     fun onHelp(help: CommandHelp)
     {
         help.showHelp()

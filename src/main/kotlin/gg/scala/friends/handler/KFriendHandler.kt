@@ -2,14 +2,13 @@ package gg.scala.friends.handler
 
 import gg.scala.aware.annotation.Subscribe
 import gg.scala.aware.message.AwareMessage
+import gg.scala.commons.acf.ConditionFailedException
 import gg.scala.lemon.Lemon
 import gg.scala.lemon.handler.RedisHandler
 import gg.scala.lemon.player.wrapper.AsyncLemonPlayer
 import gg.scala.lemon.util.CubedCacheUtil
 import gg.scala.lemon.util.QuickAccess
 import gg.scala.lemon.util.QuickAccess.username
-import io.lettuce.core.api.StatefulRedisConnection
-import gg.scala.commons.acf.ConditionFailedException
 import net.evilblock.cubed.util.CC
 import net.evilblock.cubed.util.bukkit.Constants
 import net.evilblock.cubed.util.bukkit.FancyMessage
@@ -118,9 +117,8 @@ object KFriendHandler
         }
     }
 
-    private val cacheConn: StatefulRedisConnection<String, String> by lazy {
-        Lemon.instance.aware
-            .internal().connect()
+    val cacheConn by lazy {
+        Lemon.instance.aware.internal().connect()!!
     }
 
     private fun internalHandleFriendRequestDispatch(
@@ -284,5 +282,47 @@ object KFriendHandler
 
             exists
         }
+    }
+
+    fun getOutgoingFriendRequests(requester: UUID): List<Pair<String, UUID>>
+    {
+        val requests = mutableListOf<Pair<String, UUID>>()
+
+        val keys = this.cacheConn.sync()
+            .keys("friends:requests:*")
+
+        for (key in keys)
+        {
+            val split = key
+                .split(":")
+                .toMutableList()
+
+            if (key.contains(requester.toString()))
+            {
+                requests += key to UUID
+                    .fromString(
+                        split[2]
+                    )
+            }
+//
+//            println("split: $split")
+//
+//            val values = this.cacheConn
+//                .sync().keys(
+//                    split.apply { removeLast() }
+//                        .joinToString(":")
+//                )
+//
+//            println("values: $values")
+//
+//            val uniqueIds = values
+//                .map {
+//                    UUID.fromString(
+//                        it.replace("friends:requests:", "")
+//                    )
+//                }
+        }
+
+        return requests
     }
 }

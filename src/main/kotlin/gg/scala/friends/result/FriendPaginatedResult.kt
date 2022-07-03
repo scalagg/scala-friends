@@ -21,7 +21,7 @@ object FriendPaginatedResult : PaginatedResult<UUID>()
 
         return if (fundamental != null)
         {
-            "${CC.GREEN} ● ${CC.PRI}$username${CC.SEC} is on ${CC.D_AQUA}${fundamental.id}${CC.SEC}."
+            "${CC.GREEN} ● ${CC.PRI}$username${CC.SEC} is on ${CC.GREEN}${fundamental.id}${CC.SEC}."
         } else
         {
             "${CC.RED} ● ${CC.PRI}$username${CC.SEC} is offline."
