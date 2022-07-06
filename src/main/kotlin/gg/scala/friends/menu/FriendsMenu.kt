@@ -99,7 +99,7 @@ class FriendsMenu : PaginatedMenu()
                 player.closeInventory()
 
                 EzPrompt(
-                    promptText = "${CC.SEC}Please enter a username.",
+                    promptText = "${CC.GREEN}Please enter a username.",
                     complete = {
                         val uniqueId = CubedCacheUtil
                             .fetchUuid(it)
@@ -111,7 +111,7 @@ class FriendsMenu : PaginatedMenu()
                                 player, uniqueId
                             )
                     }
-                )
+                ).start(player)
             }
 
 
