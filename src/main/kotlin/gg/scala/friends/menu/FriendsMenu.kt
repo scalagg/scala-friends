@@ -1,24 +1,27 @@
 package gg.scala.friends.menu
 
 import com.cryptomorin.xseries.XMaterial
+import gg.scala.cookie.Cookie
 import gg.scala.friends.FriendsSpigotPlugin
 import gg.scala.friends.handler.KFriendHandler
 import gg.scala.friends.handler.KPlayerHandler
 import gg.scala.friends.player.KFriendsPlayer
 import gg.scala.friends.socials.SocialMediaProvider
 import gg.scala.friends.socials.SocialMediaTexturedButton
+import gg.scala.friends.textured
 import gg.scala.lemon.handler.PlayerHandler
 import gg.scala.lemon.util.CubedCacheUtil
 import net.evilblock.cubed.menu.Button
-import net.evilblock.cubed.menu.buttons.TexturedHeadButton
 import net.evilblock.cubed.menu.pagination.PaginatedMenu
 import net.evilblock.cubed.util.CC
+import net.evilblock.cubed.util.bukkit.ColorUtil
 import net.evilblock.cubed.util.bukkit.Constants
 import net.evilblock.cubed.util.bukkit.ItemBuilder
 import net.evilblock.cubed.util.bukkit.Tasks
 import net.evilblock.cubed.util.time.TimeUtil
 import net.wesjd.anvilgui.AnvilGUI
 import org.apache.commons.lang3.time.DurationFormatUtils
+import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
@@ -47,7 +50,12 @@ class FriendsMenu(
 
         @JvmStatic
         val PLACEHOLDERS = listOf(
-            1, 10, 19, 19 + 9, 17, 17 + 9
+            1, 10, 19, 19 + 9, 19 + 18
+        )
+
+        @JvmStatic
+        val RIGHT_PLACEHOLDERS = listOf(
+            17, 17 + 9, 17 + 18
         )
 
         @JvmStatic
@@ -55,9 +63,14 @@ class FriendsMenu(
             .getPlugin(FriendsSpigotPlugin::class.java)
     }
 
-    enum class RenderState
+    enum class RenderState(
+        val color: Int
+    )
     {
-        REQUESTS, FRIENDS, PROFILE
+        REQUESTS(color = 4),
+        FRIENDS(color = 5),
+        PROFILE(color = 1),
+        SETTINGS(color = 3)
     }
 
     private var render = defaultState
@@ -70,9 +83,9 @@ class FriendsMenu(
     }
 
     override fun getAllPagesButtonSlots() = SLOTS
-    override fun size(buttons: Map<Int, Button>) = 36
+    override fun size(buttons: Map<Int, Button>) = 45
 
-    override fun getPageButtonSlots() = 8 to 26 + 9
+    override fun getPageButtonSlots() = 8 to 26 + 18
     override fun getPrePaginatedTitle(player: Player) =
         if (render == RenderState.PROFILE)
             "Your Profile" else "Profile ${Constants.DOUBLE_ARROW_RIGHT} Viewing ${
@@ -126,6 +139,18 @@ class FriendsMenu(
             }
 
         buttons[9] = ItemBuilder
+            .copyOf(
+                player.textured(Constants.BELL_ICON)
+            )
+            .name("${CC.YELLOW}Your Preferences")
+            .addToLore(
+                "${CC.GRAY}View your preferences."
+            )
+            .toButton { _, _ ->
+                this.render = RenderState.SETTINGS
+            }
+
+        buttons[18] = ItemBuilder
             .of(XMaterial.OAK_SIGN)
             .name("${CC.YELLOW}Your Friends")
             .addToLore(
@@ -135,7 +160,7 @@ class FriendsMenu(
                 this.render = RenderState.FRIENDS
             }
 
-        buttons[18] = ItemBuilder
+        buttons[27] = ItemBuilder
             .of(XMaterial.HOPPER)
             .name("${CC.YELLOW}Your Friend Requests")
             .addToLore(
@@ -145,11 +170,9 @@ class FriendsMenu(
                 this.render = RenderState.REQUESTS
             }
 
-        val greenPlusIcon = object : TexturedHeadButton(Constants.GREEN_PLUS_TEXTURE)
-        {}
-            .getButtonItem(player)
+        val greenPlusIcon = player.textured(Constants.GREEN_PLUS_TEXTURE)
 
-        buttons[27] = ItemBuilder
+        buttons[36] = ItemBuilder
             .copyOf(greenPlusIcon)
             .name("${CC.YELLOW}Add a Friend")
             .addToLore(
@@ -198,8 +221,19 @@ class FriendsMenu(
                     .open(player)
             }
 
+        val placeholderButton = ItemBuilder
+            .copyOf(
+                PLACEHOLDER.getButtonItem(player)
+            )
+            .data(render.color.toShort())
+            .toButton()
 
         for (placeholder in PLACEHOLDERS)
+        {
+            buttons[placeholder] = placeholderButton
+        }
+
+        for (placeholder in RIGHT_PLACEHOLDERS)
         {
             buttons[placeholder] = PLACEHOLDER
         }
@@ -211,22 +245,39 @@ class FriendsMenu(
     {
         val buttons = mutableMapOf<Int, Button>()
 
-        val friendsPlayer = KPlayerHandler
-            .find(player) ?: return buttons
-
         when (render)
         {
             RenderState.FRIENDS ->
-                configureFriendsList(buttons, player, friendsPlayer)
+                configureFriendsList(buttons, player)
 
             RenderState.REQUESTS ->
                 configureFriendRequests(buttons, player)
 
             RenderState.PROFILE ->
                 configureProfile(buttons, player)
+
+            RenderState.SETTINGS ->
+                configureSettings(buttons, player)
         }
 
         return buttons
+    }
+
+    private fun configureSettings(
+        buttons: MutableMap<Int, Button>,
+        player: Player
+    )
+    {
+        Cookie.instance.playerSettings
+            .filter {
+                it.hasPermission(player)
+            }
+            .flatMap {
+                it.getButtons(player).values
+            }
+            .forEach {
+                buttons[buttons.size] = it
+            }
     }
 
     private fun configureProfile(
@@ -321,10 +372,12 @@ class FriendsMenu(
 
     private fun configureFriendsList(
         buttons: MutableMap<Int, Button>,
-        player: Player,
-        friendsPlayer: KFriendsPlayer
+        player: Player
     )
     {
+        val friendsPlayer = KPlayerHandler
+            .find(player)!!
+
         val descending = friendsPlayer.friends.entries
             .sortedByDescending {
                 if (friendsPlayer.bestFriends.contains(it.key))
