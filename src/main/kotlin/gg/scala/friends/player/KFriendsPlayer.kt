@@ -2,6 +2,7 @@ package gg.scala.friends.player
 
 import gg.scala.common.Savable
 import gg.scala.friends.handler.KPlayerHandler
+import gg.scala.friends.socials.SocialMediaProvider
 import gg.scala.store.controller.DataStoreObjectControllerCache
 import gg.scala.store.controller.annotations.Timestamp
 import gg.scala.store.storage.storable.IDataStoreObject
@@ -27,9 +28,14 @@ class KFriendsPlayer(
     val friends = mutableMapOf<UUID, Long>()
     val bestFriends = mutableSetOf<UUID>()
 
-    fun UUID.isBest(): Boolean
+    val socialMedia =
+        mutableMapOf<SocialMediaProvider, String>()
+
+    fun media(
+        provider: SocialMediaProvider
+    ): String?
     {
-        return bestFriends.contains(this)
+        return socialMedia[provider]
     }
 
     fun orderedFriends(): List<UUID>
