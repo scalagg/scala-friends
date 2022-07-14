@@ -244,6 +244,7 @@ object KFriendHandler
             ?: throw RuntimeException()
 
         friendPlayer.friends.remove(uniqueId)
+        friendPlayer.bestFriends.remove(uniqueId)
         friendPlayer.save()
 
         RedisHandler.buildMessage(
@@ -304,23 +305,6 @@ object KFriendHandler
                         split[2]
                     )
             }
-//
-//            println("split: $split")
-//
-//            val values = this.cacheConn
-//                .sync().keys(
-//                    split.apply { removeLast() }
-//                        .joinToString(":")
-//                )
-//
-//            println("values: $values")
-//
-//            val uniqueIds = values
-//                .map {
-//                    UUID.fromString(
-//                        it.replace("friends:requests:", "")
-//                    )
-//                }
         }
 
         return requests

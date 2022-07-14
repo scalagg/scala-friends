@@ -203,27 +203,62 @@ class FriendsMenu : PaginatedMenu()
         friendsPlayer: KFriendsPlayer
     )
     {
-        for (friend in friendsPlayer.friends)
+        val descending = friendsPlayer.friends.entries
+            .sortedByDescending {
+                if (friendsPlayer.bestFriends.contains(it.key))
+                    1 else 0
+            }
+
+        for (friend in descending)
         {
             val username = CubedCacheUtil
                 .fetchName(friend.key)!!
 
+            val bestFriend = friendsPlayer
+                .bestFriends.contains(friend.key)
+
             buttons[buttons.size] = ItemBuilder
                 .of(Material.SKULL_ITEM)
                 .owner(username)
-                .name("${CC.YELLOW}$username")
+                .name("${CC.YELLOW}$username${
+                    if (bestFriend) "${CC.GRAY} (Best Friend)" else ""
+                }")
                 .addToLore(
                     "${CC.GRAY}Added on: ${CC.WHITE}${
                         TimeUtil.formatIntoDateString(
                             Date(friend.value)
                         )
                     }",
-                    "",
-                    "${CC.RED}Right-Click to remove!"
+                    ""
                 )
+                .apply {
+                    if (bestFriend)
+                    {
+                        addToLore(
+                            "${CC.D_GREEN}Left-Click to remove from",
+                            "${CC.D_GREEN}best-friends list!"
+                        )
+                    } else
+                    {
+                        addToLore(
+                            "${CC.GREEN}Left-Click to add to",
+                            "${CC.GREEN}best-friends list!"
+                        )
+                    }
+
+                    addToLore(
+                        "${CC.RED}Right-Click to remove!"
+                    )
+                }
                 .data(3)
+                .apply {
+                    if (bestFriend)
+                    {
+                        glow()
+                    }
+                }
                 .toButton { _, type ->
-                    if (type!!.name.contains("RIGHT"))
+                    if (type!!.isRightClick)
                     {
                         player.closeInventory()
 
@@ -231,6 +266,15 @@ class FriendsMenu : PaginatedMenu()
                             .attemptFriendRemoval(
                                 player, friend.key
                             )
+                    } else if (type.isLeftClick)
+                    {
+                        if (bestFriend)
+                        {
+                            friendsPlayer.bestFriends.remove(friend.key)
+                        } else
+                        {
+                            friendsPlayer.bestFriends.add(friend.key)
+                        }
                     }
                 }
         }

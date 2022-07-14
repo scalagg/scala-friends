@@ -22,7 +22,6 @@ String environmental(String key)
     return project.property(key)
 }
 
-
 repositories {
     mavenCentral()
 

@@ -25,6 +25,12 @@ class KFriendsPlayer(
         get() = uniqueId
 
     val friends = mutableMapOf<UUID, Long>()
+    val bestFriends = mutableSetOf<UUID>()
+
+    fun UUID.isBest(): Boolean
+    {
+        return bestFriends.contains(this)
+    }
 
     fun orderedFriends(): List<UUID>
     {
