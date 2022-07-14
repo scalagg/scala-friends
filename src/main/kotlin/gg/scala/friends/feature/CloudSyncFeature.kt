@@ -21,7 +21,7 @@ object CloudSyncFeature
         CloudSyncDiscoveryService
             .discoverable.assets
             .apply {
-                add("gg.scala.friends:friends:friends")
+                add("gg.scala.friends:scala-friends:friends")
             }
     }
 }
