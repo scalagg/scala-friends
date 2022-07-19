@@ -5,23 +5,22 @@ import gg.scala.cookie.Cookie
 import gg.scala.friends.FriendsSpigotPlugin
 import gg.scala.friends.handler.KFriendHandler
 import gg.scala.friends.handler.KPlayerHandler
-import gg.scala.friends.player.KFriendsPlayer
 import gg.scala.friends.socials.SocialMediaProvider
 import gg.scala.friends.socials.SocialMediaTexturedButton
 import gg.scala.friends.textured
 import gg.scala.lemon.handler.PlayerHandler
 import gg.scala.lemon.util.CubedCacheUtil
+import gg.scala.lemon.util.QuickAccess
 import net.evilblock.cubed.menu.Button
 import net.evilblock.cubed.menu.pagination.PaginatedMenu
 import net.evilblock.cubed.util.CC
-import net.evilblock.cubed.util.bukkit.ColorUtil
 import net.evilblock.cubed.util.bukkit.Constants
 import net.evilblock.cubed.util.bukkit.ItemBuilder
 import net.evilblock.cubed.util.bukkit.Tasks
+import net.evilblock.cubed.util.bukkit.prompt.EzPrompt
 import net.evilblock.cubed.util.time.TimeUtil
 import net.wesjd.anvilgui.AnvilGUI
 import org.apache.commons.lang3.time.DurationFormatUtils
-import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
@@ -40,10 +39,9 @@ class FriendsMenu(
         @JvmStatic
         val SLOTS by lazy {
             val slots = mutableListOf<Int>()
-            slots += listOf(2, 3, 4, 5, 6, 7)
-            slots += listOf(2, 3, 4, 5, 6, 7).map { it + 9 }
-            slots += listOf(2, 3, 4, 5, 6, 7).map { it + 18 }
-            slots += listOf(2, 3, 4, 5, 6, 7).map { it + 27 }
+            slots += listOf(3, 4, 5, 6).map { it + 9 }
+            slots += listOf(3, 4, 5, 6).map { it + 18 }
+            slots += listOf(3, 4, 5, 6).map { it + 27 }
 
             slots
         }
@@ -100,6 +98,11 @@ class FriendsMenu(
         val lemonPlayer = PlayerHandler
             .find(player.uniqueId)!!
 
+        if (render == RenderState.PROFILE)
+        {
+            configureProfileExtensive(buttons, player)
+        }
+
         buttons[0] = ItemBuilder
             .of(Material.SKULL_ITEM)
             .owner(player.name)
@@ -135,7 +138,7 @@ class FriendsMenu(
                 }"
             )
             .toButton { _, _ ->
-                this.render = RenderState.PROFILE
+                this.render(player, RenderState.PROFILE)
             }
 
         buttons[9] = ItemBuilder
@@ -147,7 +150,7 @@ class FriendsMenu(
                 "${CC.GRAY}View your preferences."
             )
             .toButton { _, _ ->
-                this.render = RenderState.SETTINGS
+                this.render(player, RenderState.SETTINGS)
             }
 
         buttons[18] = ItemBuilder
@@ -157,7 +160,7 @@ class FriendsMenu(
                 "${CC.GRAY}View your friends list."
             )
             .toButton { _, _ ->
-                this.render = RenderState.FRIENDS
+                this.render(player, RenderState.FRIENDS)
             }
 
         buttons[27] = ItemBuilder
@@ -167,7 +170,7 @@ class FriendsMenu(
                 "${CC.GRAY}View your friends requests."
             )
             .toButton { _, _ ->
-                this.render = RenderState.REQUESTS
+                this.render(player, RenderState.REQUESTS)
             }
 
         val greenPlusIcon = player.textured(Constants.GREEN_PLUS_TEXTURE)
@@ -263,6 +266,19 @@ class FriendsMenu(
         return buttons
     }
 
+    private fun render(
+        player: Player,
+        state: RenderState
+    )
+    {
+        if (this.page != 1)
+        {
+            this.modPage(player, -(this.page - 1))
+        }
+
+        this.render = state
+    }
+
     private fun configureSettings(
         buttons: MutableMap<Int, Button>,
         player: Player
@@ -289,7 +305,6 @@ class FriendsMenu(
             .find(player)
             ?: return
 
-
         for (media in SocialMediaProvider.values())
         {
             val textured = SocialMediaTexturedButton(media)
@@ -298,7 +313,7 @@ class FriendsMenu(
                 .copyOf(
                     textured.getButtonItem(player)
                 )
-                .name("${media.color}${media.name}")
+                .name("${CC.B_YELLOW}${media.name}")
                 .addToLore(
                     "${CC.GRAY}Handle:",
                     "${CC.WHITE}${
@@ -310,7 +325,29 @@ class FriendsMenu(
                     "",
                     "${CC.GREEN}Click to update!"
                 )
-                .toButton()
+                .toButton { _, _ ->
+                    player.closeInventory()
+
+                    EzPrompt(
+                        promptText = "${CC.GREEN}Please enter your ${CC.YELLOW}${media.name}${CC.GREEN} handle."
+                    ) {
+                        if (!media.regex.matches(it))
+                        {
+                            player.sendMessage("${CC.RED}That is an invalid handle for ${media.name}.")
+                            return@EzPrompt
+                        }
+
+                        friendsPlayer.socialMedia[media] = it
+
+                        friendsPlayer.save().thenRun {
+                            player.sendMessage("${CC.GREEN}Your handle has been updated to: ${CC.WHITE}${it}!")
+
+                            Tasks.sync {
+                                openMenu(player)
+                            }
+                        }
+                    }.start(player)
+                }
         }
     }
 
@@ -370,6 +407,59 @@ class FriendsMenu(
         }
     }
 
+    private fun configureProfileExtensive(
+        buttons: MutableMap<Int, Button>,
+        player: Player
+    )
+    {
+        for (supplier in plugin.suppliers)
+        {
+            val stats = supplier
+                .cache[player.uniqueId]
+
+            if (stats == null)
+            {
+                buttons[30 + buttons.size] =
+                    ItemBuilder
+                        .of(supplier.gameModeIcon())
+                        .name("${CC.B_YELLOW}${supplier.gameModeName()}")
+                        .addToLore(
+                            "${CC.RED}Your statistics for ${supplier.gameModeName()}",
+                            "${CC.RED}have not yet loaded.",
+                            "",
+                            "${CC.RED}Please wait a moment${plugin.loadingString}"
+                        )
+                        .toButton()
+                continue
+            }
+
+            if (!stats.loggedIn)
+            {
+                buttons[30 + buttons.size] =
+                    ItemBuilder
+                        .of(supplier.gameModeIcon())
+                        .name("${CC.B_YELLOW}${supplier.gameModeName()}")
+                        .addToLore(
+                            "${CC.RED}You have not yet joined",
+                            "${CC.RED}our ${supplier.gameModeName()} server."
+                        )
+                        .toButton()
+                continue
+            }
+
+            buttons[30 + buttons.size] =
+                ItemBuilder
+                    .of(supplier.gameModeIcon())
+                    .name("${CC.B_YELLOW}${supplier.gameModeName()}")
+                    .setLore(
+                        stats.render ?: listOf(
+                            "${CC.RED}Something went wrong. Contact an admin."
+                        )
+                    )
+                    .toButton()
+        }
+    }
+
     private fun configureFriendsList(
         buttons: MutableMap<Int, Button>,
         player: Player
@@ -405,6 +495,11 @@ class FriendsMenu(
                         TimeUtil.formatIntoDateString(
                             Date(friend.value)
                         )
+                    }",
+                    "",
+                    "${CC.GRAY}Online: ${
+                        if (QuickAccess.online(friend.key).join())
+                            "${CC.GREEN}Yes" else "${CC.RED}No"
                     }",
                     ""
                 )
