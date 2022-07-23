@@ -323,9 +323,17 @@ class FriendsMenu(
                     "${CC.GRAY}Example:",
                     "${media.color}${media.example}",
                     "",
-                    "${CC.GREEN}Click to update!"
+                    "${CC.GREEN}Left-Click to update!",
+                    "${CC.RED}Right-Click to reset!",
                 )
-                .toButton { _, _ ->
+                .toButton { _, type ->
+                    if (type!!.isRightClick)
+                    {
+                        friendsPlayer.socialMedia.remove(media)
+                        player.sendMessage("${CC.GREEN}Your handle has been reset!")
+                        return@toButton
+                    }
+
                     player.closeInventory()
 
                     EzPrompt(
