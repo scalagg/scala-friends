@@ -9,19 +9,6 @@ plugins {
 group "gg.scala.friends"
 version "2.0.0"
 
-String environmental(String key)
-{
-    final String environment =
-        System.getenv(key)
-
-    if (environment != null)
-    {
-        return environment
-    }
-
-    return project.property(key)
-}
-
 repositories {
     mavenCentral()
 
@@ -38,11 +25,11 @@ repositories {
 
     maven {
         name "Scala"
-        url "${environmental("artifactory_contextUrl")}/gradle-release"
+        url "${property("artifactory_contextUrl")}/gradle-release"
 
         credentials {
-            username environmental("artifactory_user")
-            password environmental("artifactory_password")
+            username property("artifactory_user")
+            password property("artifactory_password")
         }
     }
 }
@@ -59,7 +46,7 @@ dependencies {
     compileOnly "gg.scala.cookie:Cookie:1.1.5"
 
     compileOnly "gg.scala.lemon:bukkit:1.2.4"
-    compileOnly "gg.scala.spigot:sspigot-server:1.0.7"
+    compileOnly "gg.scala.spigot:server:1.1.0"
 
     compileOnly "gg.scala.cloudsync:spigot:1.0.1"
     compileOnly "gg.scala.commons:bukkit:2.0.0"
@@ -90,24 +77,24 @@ publishing {
     repositories {
         maven {
             name "scala"
-            url "${environmental("artifactory_contextUrl")}/gradle-release"
+            url "${property("artifactory_contextUrl")}/gradle-release"
 
             credentials {
-                username environmental("artifactory_user")
-                password environmental("artifactory_password")
+                username property("artifactory_user")
+                password property("artifactory_password")
             }
         }
     }
 }
 
 artifactory {
-    this.contextUrl = environmental("artifactory_contextUrl")
+    this.contextUrl = property("artifactory_contextUrl")
 
     publish {
         repository {
-            repoKey = environmental("artifactory_release_local")
-            username = environmental("artifactory_user")
-            password = environmental("artifactory_password")
+            repoKey = property("artifactory_release_local")
+            username = property("artifactory_user")
+            password = property("artifactory_password")
             maven = true
         }
     }
