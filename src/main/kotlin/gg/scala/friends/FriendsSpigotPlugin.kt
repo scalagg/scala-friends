@@ -9,6 +9,7 @@ import gg.scala.commons.annotations.container.ContainerEnable
 import gg.scala.friends.handler.KFriendHandler
 import gg.scala.friends.statistics.StatisticRetrievalResult
 import gg.scala.friends.statistics.StatisticsSupplier
+import gg.scala.lemon.LemonConstants
 import gg.scala.store.controller.DataStoreObjectControllerCache
 import gg.scala.store.storage.storable.IDataStoreObject
 import gg.scala.store.storage.type.DataStoreStorageType
@@ -51,13 +52,16 @@ class FriendsSpigotPlugin : ExtendedScalaPlugin()
     @ContainerEnable
     fun containerEnable()
     {
-        this.packageIndexer
-            .getSubTypes<StatisticsSupplier<out IDataStoreObject>>()
-            .mapNotNull { it.objectInstance() }
-            .forEach {
-                this.suppliers.add(it as StatisticsSupplier<out IDataStoreObject>)
-                this.logger.info("Loaded stats supplier: ${it.javaClass.simpleName}")
-            }
+        if (LemonConstants.SERVER_NAME != "Minequest")
+        {
+            this.packageIndexer
+                .getSubTypes<StatisticsSupplier<out IDataStoreObject>>()
+                .mapNotNull { it.objectInstance() }
+                .forEach {
+                    this.suppliers.add(it as StatisticsSupplier<out IDataStoreObject>)
+                    this.logger.info("Loaded stats supplier: ${it.javaClass.simpleName}")
+                }
+        }
 
         this.aware.listen(KFriendHandler)
         this.aware.connect()

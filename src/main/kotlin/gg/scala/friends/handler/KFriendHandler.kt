@@ -42,7 +42,7 @@ object KFriendHandler
 
             if (friendPlayer.friends[uniqueId] != null)
             {
-                player.sendMessage("${CC.B_GOLD}Friends ${CC.GRAY}${Constants.DOUBLE_ARROW_RIGHT} ${CC.PRI}$username ${CC.SEC}$type.")
+                player.sendMessage("${CC.B_PRI}Friends ${CC.GRAY}${Constants.DOUBLE_ARROW_RIGHT} ${CC.GREEN}$username ${CC.SEC}$type.")
             }
         }
     }
