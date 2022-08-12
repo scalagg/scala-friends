@@ -119,7 +119,7 @@ class FriendsMenu(
                     TimeUtil.formatIntoFullCalendarString(
                         Date(
                             lemonPlayer.getMetadata("first-connection")
-                                ?.asString()?.toLong() ?: System.currentTimeMillis()
+                                ?.asLong() ?: System.currentTimeMillis()
                         )
                     )
                 }",
@@ -129,7 +129,7 @@ class FriendsMenu(
                     TimeUtil.formatIntoFullCalendarString(
                         Date(
                             lemonPlayer.getMetadata("last-connection")
-                                ?.asString()?.toLong() ?: System.currentTimeMillis()
+                                ?.asLong() ?: System.currentTimeMillis()
                         )
                     )
                 }",
