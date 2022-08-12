@@ -114,6 +114,7 @@ class FriendsMenu(
                 }",
                 "${CC.GRAY}Clan: ${CC.WHITE}N/A",
                 "",
+                /**
                 "${CC.GRAY}First joined:",
                 "${CC.WHITE}${
                     TimeUtil.formatIntoFullCalendarString(
@@ -133,6 +134,7 @@ class FriendsMenu(
                         )
                     )
                 }",
+                **/
                 "${CC.GRAY}Last seen on: ${CC.WHITE}${
                     lemonPlayer.getMetadata("last-connected-server-id")?.asString() ?: "N/A"
                 }"
