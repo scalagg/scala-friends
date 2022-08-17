@@ -32,8 +32,8 @@ object FriendPaginatedResult : PaginatedResult<UUID>()
 
             "${CC.RED} ● ${CC.PRI}$username${CC.SEC} ${
                 if (lastLogin == null) "was never on" else "was on ${
-                    DateUtil.formatSimplifiedDateDiff(System.currentTimeMillis() - lastLogin)
-                } ago."
+                    DateUtil.formatSimplifiedDateDiff(lastLogin)
+                } ago"
             }."
         }
     }
