@@ -4,6 +4,8 @@ import gg.scala.lemon.util.QuickAccess
 import gg.scala.lemon.util.QuickAccess.username
 import net.evilblock.cubed.util.CC
 import net.evilblock.cubed.util.bukkit.PaginatedResult
+import net.evilblock.cubed.util.time.DateUtil
+import org.apache.commons.lang3.time.DurationFormatUtils
 import java.util.*
 
 /**
@@ -24,7 +26,15 @@ object FriendPaginatedResult : PaginatedResult<UUID>()
             "${CC.GREEN} ● ${CC.PRI}$username${CC.SEC} is on ${CC.GREEN}${fundamental.id}${CC.SEC}."
         } else
         {
-            "${CC.RED} ● ${CC.PRI}$username${CC.SEC} is offline."
+            val lastLogin = QuickAccess
+                .getLastOnline(result)
+                .join()
+
+            "${CC.RED} ● ${CC.PRI}$username${CC.SEC} ${
+                if (lastLogin == null) "was never on" else "was on ${
+                    DateUtil.formatSimplifiedDateDiff(System.currentTimeMillis() - lastLogin)
+                } ago."
+            }."
         }
     }
 

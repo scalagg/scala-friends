@@ -16,7 +16,7 @@ enum class SocialMediaProvider(
 {
     GitHub(
         color = ChatColor.WHITE,
-        regex = "(?!.*(-){2,}.*)[a-z0-9][a-z0-9-]{0,38}[a-z0-9]".toRegex(),
+        regex = "^[A-Za-z0-9_]{1,15}\$".toRegex(),
         skinSignature = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjZlMjdkYTEyODE5YThiMDUzZGEwY2MyYjYyZGVjNGNkYTkxZGU2ZWVlYzIxY2NmM2JmZTZkZDhkNDQzNmE3In19fQ==",
         example = "Example"
     ),
@@ -37,5 +37,11 @@ enum class SocialMediaProvider(
         regex = "((http|https):\\/\\/|)(www\\.|)youtube\\.com\\/(channel\\/|user\\/)[a-zA-Z0-9_-]{1,}".toRegex(),
         skinSignature = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDJmNmMwN2EzMjZkZWY5ODRlNzJmNzcyZWQ2NDU0NDlmNWVjOTZjNmNhMjU2NDk5YjVkMmI4NGE4ZGNlIn19fQ==",
         example = "https://youtube.com/user/YouTube"
+    ),
+    Instagram(
+        color = ChatColor.LIGHT_PURPLE,
+        regex = "^[A-Za-z0-9_]{1,15}\$".toRegex(),
+        skinSignature = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjViM2YyY2ZhMDczOWM0ZTgyODMxNmYzOWY5MGIwNWJjMWY0ZWQyN2IxZTM1ODg4NTExZjU1OGQ0Njc1In19fQ==",
+        example = "Example"
     )
 }

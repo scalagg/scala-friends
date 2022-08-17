@@ -39,9 +39,9 @@ class FriendsMenu(
         @JvmStatic
         val SLOTS by lazy {
             val slots = mutableListOf<Int>()
-            slots += listOf(3, 4, 5, 6).map { it + 9 }
-            slots += listOf(3, 4, 5, 6).map { it + 18 }
-            slots += listOf(3, 4, 5, 6).map { it + 27 }
+            slots += listOf(3, 4, 5, 6, 7).map { it + 9 }
+            slots += listOf(3, 4, 5, 6, 7).map { it + 18 }
+            slots += listOf(3, 4, 5, 6, 7).map { it + 27 }
 
             slots
         }
@@ -49,11 +49,6 @@ class FriendsMenu(
         @JvmStatic
         val PLACEHOLDERS = listOf(
             1, 10, 19, 19 + 9, 19 + 18
-        )
-
-        @JvmStatic
-        val RIGHT_PLACEHOLDERS = listOf(
-            17, 17 + 9, 17 + 18
         )
 
         @JvmStatic
@@ -236,11 +231,6 @@ class FriendsMenu(
             buttons[placeholder] = placeholderButton
         }
 
-        for (placeholder in RIGHT_PLACEHOLDERS)
-        {
-            buttons[placeholder] = PLACEHOLDER
-        }
-
         return buttons
     }
 
@@ -357,6 +347,65 @@ class FriendsMenu(
                     }.start(player)
                 }
         }
+
+        buttons[buttons.size] = ItemBuilder.of(Material.AIR).toButton()
+
+        buttons[buttons.size] = ItemBuilder
+            .copyOf(
+                player.textured(Constants.TROPHY_ICON)
+            )
+            .name("${CC.B_YELLOW}Achievements")
+            .addToLore("${CC.GRAY}Coming soon!")
+            .toButton()
+
+        buttons[buttons.size] = ItemBuilder
+            .copyOf(
+                player.textured(Constants.SUNNY_SKY_ICON)
+            )
+            .name("${CC.B_YELLOW}Played Games")
+            .addToLore(
+                "${CC.GRAY}Most recent previously",
+                "${CC.GRAY}played games.",
+                "",
+                "${CC.GREEN}Click to view!"
+            )
+            .toButton { _, _ ->
+                player.chat("/games")
+            }
+
+        buttons[buttons.size] = ItemBuilder
+            .copyOf(
+                player.textured(Constants.GMAIL_ICON)
+            )
+            .name("${CC.B_YELLOW}Notifications")
+            .addToLore(
+                "${CC.GRAY}All unread notifications.",
+                "",
+                "${CC.GREEN}Click to view!"
+            )
+            .toButton { _, _ ->
+                player.chat("/notifications")
+            }
+
+        buttons[buttons.size] = ItemBuilder.of(Material.AIR).toButton()
+        buttons[buttons.size] = ItemBuilder.of(Material.AIR).toButton()
+        buttons[buttons.size] = ItemBuilder.of(Material.AIR).toButton()
+
+        buttons[buttons.size] = ItemBuilder
+            .copyOf(
+                player.textured(Constants.GLOBE_ICON)
+            )
+            .name("${CC.B_YELLOW}Languages")
+            .addToLore(
+                "${CC.GRAY}Select your language:",
+                " ${CC.WHITE}- English",
+                " ${CC.WHITE}- Español",
+                "",
+                "${CC.GREEN}Click to edit!"
+            )
+            .toButton { _, _ ->
+                player.sendMessage("${CC.RED}This feature is temporarily disabled!")
+            }
     }
 
     private fun configureFriendRequests(

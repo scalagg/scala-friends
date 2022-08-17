@@ -3,6 +3,7 @@ package gg.scala.friends.player
 import gg.scala.common.Savable
 import gg.scala.friends.handler.KPlayerHandler
 import gg.scala.friends.socials.SocialMediaProvider
+import gg.scala.lemon.util.QuickAccess
 import gg.scala.store.controller.DataStoreObjectControllerCache
 import gg.scala.store.controller.annotations.Timestamp
 import gg.scala.store.storage.storable.IDataStoreObject
@@ -42,6 +43,9 @@ class KFriendsPlayer(
     {
         return friends.keys.toList()
             .sortedByDescending { friends[it]!! }
+            .sortedByDescending {
+                if (QuickAccess.online(it).join()) 1 else 0
+            }
     }
 
     override fun save(): CompletableFuture<Void>
