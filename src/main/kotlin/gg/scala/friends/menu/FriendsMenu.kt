@@ -109,12 +109,13 @@ class FriendsMenu(
                 }",
                 "${CC.GRAY}Clan: ${CC.WHITE}N/A",
                 "",
+                /**
                 "${CC.GRAY}First joined:",
                 "${CC.WHITE}${
                     TimeUtil.formatIntoFullCalendarString(
                         Date(
                             lemonPlayer.getMetadata("first-connection")
-                                ?.asString()?.toLong() ?: System.currentTimeMillis()
+                                ?.asLong() ?: System.currentTimeMillis()
                         )
                     )
                 }",
@@ -124,10 +125,11 @@ class FriendsMenu(
                     TimeUtil.formatIntoFullCalendarString(
                         Date(
                             lemonPlayer.getMetadata("last-connection")
-                                ?.asString()?.toLong() ?: System.currentTimeMillis()
+                                ?.asLong() ?: System.currentTimeMillis()
                         )
                     )
                 }",
+                **/
                 "${CC.GRAY}Last seen on: ${CC.WHITE}${
                     lemonPlayer.getMetadata("last-connected-server-id")?.asString() ?: "N/A"
                 }"
