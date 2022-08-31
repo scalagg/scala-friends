@@ -37,19 +37,10 @@ class FriendsMenu(
     companion object
     {
         @JvmStatic
-        val SLOTS by lazy {
-            val slots = mutableListOf<Int>()
-            slots += listOf(3, 4, 5, 6, 7).map { it + 9 }
-            slots += listOf(3, 4, 5, 6, 7).map { it + 18 }
-            slots += listOf(3, 4, 5, 6, 7).map { it + 27 }
-
-            slots
-        }
+        val SLOTS = 18..44
 
         @JvmStatic
-        val PLACEHOLDERS = listOf(
-            1, 10, 19, 19 + 9, 19 + 18
-        )
+        val PLACEHOLDERS = 9..17
 
         @JvmStatic
         private val plugin = JavaPlugin
@@ -75,10 +66,10 @@ class FriendsMenu(
         updateAfterClick = true
     }
 
-    override fun getAllPagesButtonSlots() = SLOTS
+    override fun getAllPagesButtonSlots() = SLOTS.toList()
     override fun size(buttons: Map<Int, Button>) = 45
 
-    override fun getPageButtonSlots() = 8 to 26 + 18
+    override fun getPageButtonSlots() = 9 to 17
     override fun getPrePaginatedTitle(player: Player) =
         if (render == RenderState.PROFILE)
             "Your Profile" else "Profile ${Constants.DOUBLE_ARROW_RIGHT} Viewing ${
@@ -98,7 +89,7 @@ class FriendsMenu(
             configureProfileExtensive(buttons, player)
         }
 
-        buttons[0] = ItemBuilder
+        buttons[2] = ItemBuilder
             .of(Material.SKULL_ITEM)
             .owner(player.name)
             .data(3)
@@ -138,7 +129,7 @@ class FriendsMenu(
                 this.render(player, RenderState.PROFILE)
             }
 
-        buttons[9] = ItemBuilder
+        buttons[3] = ItemBuilder
             .copyOf(
                 player.textured(Constants.BELL_ICON)
             )
@@ -150,7 +141,7 @@ class FriendsMenu(
                 this.render(player, RenderState.SETTINGS)
             }
 
-        buttons[18] = ItemBuilder
+        buttons[4] = ItemBuilder
             .of(XMaterial.OAK_SIGN)
             .name("${CC.YELLOW}Your Friends")
             .addToLore(
@@ -160,7 +151,7 @@ class FriendsMenu(
                 this.render(player, RenderState.FRIENDS)
             }
 
-        buttons[27] = ItemBuilder
+        buttons[5] = ItemBuilder
             .of(XMaterial.HOPPER)
             .name("${CC.YELLOW}Your Friend Requests")
             .addToLore(
@@ -172,7 +163,7 @@ class FriendsMenu(
 
         val greenPlusIcon = player.textured(Constants.GREEN_PLUS_TEXTURE)
 
-        buttons[36] = ItemBuilder
+        buttons[6] = ItemBuilder
             .copyOf(greenPlusIcon)
             .name("${CC.YELLOW}Add a Friend")
             .addToLore(
