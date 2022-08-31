@@ -51,10 +51,10 @@ class FriendsMenu(
         val color: Int
     )
     {
-        REQUESTS(color = 4),
-        FRIENDS(color = 5),
-        PROFILE(color = 1),
-        SETTINGS(color = 3)
+        REQUESTS(color = 15/*4*/),
+        FRIENDS(color = 15/*5*/),
+        PROFILE(color = 15/*1*/),
+        SETTINGS(color = 15/*3*/)
     }
 
     private var render = defaultState
@@ -67,7 +67,6 @@ class FriendsMenu(
     }
 
     override fun getAllPagesButtonSlots() = SLOTS.toList()
-    override fun size(buttons: Map<Int, Button>) = 45
 
     override fun getPageButtonSlots() = 9 to 17
     override fun getPrePaginatedTitle(player: Player) =
@@ -341,8 +340,6 @@ class FriendsMenu(
                 }
         }
 
-        buttons[buttons.size] = ItemBuilder.of(Material.AIR).toButton()
-
         buttons[buttons.size] = ItemBuilder
             .copyOf(
                 player.textured(Constants.TROPHY_ICON)
@@ -379,10 +376,6 @@ class FriendsMenu(
             .toButton { _, _ ->
                 player.chat("/notifications")
             }
-
-        buttons[buttons.size] = ItemBuilder.of(Material.AIR).toButton()
-        buttons[buttons.size] = ItemBuilder.of(Material.AIR).toButton()
-        buttons[buttons.size] = ItemBuilder.of(Material.AIR).toButton()
 
         buttons[buttons.size] = ItemBuilder
             .copyOf(
