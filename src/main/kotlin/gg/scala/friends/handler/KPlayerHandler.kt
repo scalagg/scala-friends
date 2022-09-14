@@ -13,9 +13,6 @@ import java.util.*
 @Service
 object KPlayerHandler : ProfileOrchestrator<KFriendsPlayer>()
 {
-    override fun new(uniqueId: UUID) =
-        KFriendsPlayer(uniqueId)
-
-    override fun type() =
-        KFriendsPlayer::class
+    override fun new(uniqueId: UUID) = KFriendsPlayer(uniqueId)
+    override fun type() = KFriendsPlayer::class
 }

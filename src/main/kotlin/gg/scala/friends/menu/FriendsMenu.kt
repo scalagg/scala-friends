@@ -544,6 +544,13 @@ class FriendsMenu(
                         if (QuickAccess.online(friend.key).join())
                             "${CC.GREEN}Yes" else "${CC.RED}No"
                     }",
+                    "${CC.GRAY}Last seen: ${
+                        TimeUtil.formatIntoDateString(
+                            Date(
+                                QuickAccess.getLastOnline(friend.key).join() ?: System.currentTimeMillis()
+                            )
+                        )
+                    }",
                     ""
                 )
                 .apply {
