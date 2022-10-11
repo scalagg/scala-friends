@@ -47,7 +47,7 @@ class FriendCommand : ScalaCommand()
                 sender = player,
                 results = friendPlayer.orderedFriends(),
                 page = page ?: 1,
-                command = "/friend list %s"
+                command = "friend list %s"
             )
         }
     }
