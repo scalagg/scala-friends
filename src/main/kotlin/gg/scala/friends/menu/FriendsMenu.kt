@@ -1,7 +1,6 @@
 package gg.scala.friends.menu
 
 import com.cryptomorin.xseries.XMaterial
-import gg.scala.cookie.Cookie
 import gg.scala.friends.FriendsSpigotPlugin
 import gg.scala.friends.handler.KFriendHandler
 import gg.scala.friends.handler.KPlayerHandler
@@ -53,8 +52,7 @@ class FriendsMenu(
     {
         REQUESTS(color = 15/*4*/),
         FRIENDS(color = 15/*5*/),
-        PROFILE(color = 15/*1*/),
-        SETTINGS(color = 15/*3*/)
+        PROFILE(color = 15/*1*/)
     }
 
     private var render = defaultState
@@ -124,18 +122,6 @@ class FriendsMenu(
             )
             .toButton { _, _ ->
                 this.render(player, RenderState.PROFILE)
-            }
-
-        buttons[3] = ItemBuilder
-            .copyOf(
-                player.textured(Constants.BELL_ICON)
-            )
-            .name("${CC.YELLOW}Your Preferences")
-            .addToLore(
-                "${CC.GRAY}View your preferences."
-            )
-            .toButton { _, _ ->
-                this.render(player, RenderState.SETTINGS)
             }
 
         buttons[4] = ItemBuilder
@@ -238,9 +224,6 @@ class FriendsMenu(
 
             RenderState.PROFILE ->
                 configureProfile(buttons, player)
-
-            RenderState.SETTINGS ->
-                configureSettings(buttons, player)
         }
 
         return buttons
@@ -257,23 +240,6 @@ class FriendsMenu(
         }
 
         this.render = state
-    }
-
-    private fun configureSettings(
-        buttons: MutableMap<Int, Button>,
-        player: Player
-    )
-    {
-        Cookie.instance.playerSettings
-            .filter {
-                it.hasPermission(player)
-            }
-            .flatMap {
-                it.getButtons(player).values
-            }
-            .forEach {
-                buttons[buttons.size] = it
-            }
     }
 
     private fun configureProfile(

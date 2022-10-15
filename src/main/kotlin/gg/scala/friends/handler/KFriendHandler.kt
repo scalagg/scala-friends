@@ -2,6 +2,8 @@ package gg.scala.friends.handler
 
 import gg.scala.aware.annotation.Subscribe
 import gg.scala.aware.message.AwareMessage
+import gg.scala.basics.plugin.profile.BasicsProfile
+import gg.scala.basics.plugin.settings.defaults.values.StateSettingValue
 import gg.scala.commons.acf.ConditionFailedException
 import gg.scala.lemon.Lemon
 import gg.scala.lemon.handler.RedisHandler
@@ -9,6 +11,8 @@ import gg.scala.lemon.player.wrapper.AsyncLemonPlayer
 import gg.scala.lemon.util.CubedCacheUtil
 import gg.scala.lemon.util.QuickAccess
 import gg.scala.lemon.util.QuickAccess.username
+import gg.scala.store.controller.DataStoreObjectControllerCache
+import gg.scala.store.storage.type.DataStoreStorageType
 import net.evilblock.cubed.util.CC
 import net.evilblock.cubed.util.bukkit.Constants
 import net.evilblock.cubed.util.bukkit.FancyMessage
@@ -260,6 +264,28 @@ object KFriendHandler
 
     private fun retrieveFriendRequestStatus(uniqueId: UUID): CompletableFuture<Boolean>
     {
+        if (Bukkit.getPluginManager().isPluginEnabled("ScBasics"))
+        {
+            return DataStoreObjectControllerCache
+                .findNotNull<BasicsProfile>()
+                .load(uniqueId, DataStoreStorageType.MONGO)
+                .thenApply {
+                    if (it == null)
+                    {
+                        throw ConditionFailedException("${CC.YELLOW}${uniqueId.username()}${CC.RED} has never logged on the server.")
+                    }
+
+                    val stateSettingValue = it
+                        .setting(
+                            id = "friend_requests",
+                            default = StateSettingValue.ENABLED
+                        )
+
+                    stateSettingValue == StateSettingValue.DISABLED
+                }
+        }
+
+
         return AsyncLemonPlayer.of(uniqueId, false).future
             .thenApply {
                 if (it.isEmpty())
@@ -267,7 +293,7 @@ object KFriendHandler
                     throw ConditionFailedException("${CC.YELLOW}${uniqueId.username()}${CC.RED} has never logged on the server.")
                 }
 
-                it[0].getSetting("party-invites-disabled")
+                it[0].getSetting("friend-requests-disabled")
             }
     }
 

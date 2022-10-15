@@ -31,8 +31,8 @@ import java.util.concurrent.ForkJoinPool
     depends = [
         PluginDependency("scala-commons"),
         PluginDependency("Lemon"),
-        PluginDependency("Cookie"),
         PluginDependency("store-spigot"),
+        PluginDependency("Cookie", soft = true),
         PluginDependency("cloudsync", soft = true)
     ]
 )
