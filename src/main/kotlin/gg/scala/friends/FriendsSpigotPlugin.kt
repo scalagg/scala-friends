@@ -128,10 +128,4 @@ class FriendsSpigotPlugin : ExtendedScalaPlugin()
                     }
             }
     }
-
-    @ContainerDisable
-    fun containerDisable()
-    {
-        this.aware.shutdown()
-    }
 }
