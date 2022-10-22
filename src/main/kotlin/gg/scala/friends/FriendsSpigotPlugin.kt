@@ -6,6 +6,12 @@ import gg.scala.aware.message.AwareMessage
 import gg.scala.commons.ExtendedScalaPlugin
 import gg.scala.commons.annotations.container.ContainerDisable
 import gg.scala.commons.annotations.container.ContainerEnable
+import gg.scala.commons.core.plugin.Plugin
+import gg.scala.commons.core.plugin.PluginAuthor
+import gg.scala.commons.core.plugin.PluginAuthorComposite
+import gg.scala.commons.core.plugin.PluginDependency
+import gg.scala.commons.core.plugin.PluginDependencyComposite
+import gg.scala.commons.core.plugin.PluginWebsite
 import gg.scala.friends.handler.KFriendHandler
 import gg.scala.friends.statistics.StatisticRetrievalResult
 import gg.scala.friends.statistics.StatisticsSupplier
@@ -14,8 +20,6 @@ import gg.scala.store.controller.DataStoreObjectControllerCache
 import gg.scala.store.storage.storable.IDataStoreObject
 import gg.scala.store.storage.type.DataStoreStorageType
 import me.lucko.helper.Events
-import me.lucko.helper.plugin.ap.Plugin
-import me.lucko.helper.plugin.ap.PluginDependency
 import org.bukkit.event.player.PlayerLoginEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import java.util.concurrent.CompletableFuture
@@ -27,14 +31,15 @@ import java.util.concurrent.ForkJoinPool
  */
 @Plugin(
     name = "Friends",
-    apiVersion = "1.18",
-    depends = [
-        PluginDependency("scala-commons"),
-        PluginDependency("Lemon"),
-        PluginDependency("store-spigot"),
-        PluginDependency("Cookie", soft = true),
-        PluginDependency("cloudsync", soft = true)
-    ]
+    version = "%remote%/%branch%/%id%"
+)
+@PluginAuthor("Scala")
+@PluginWebsite("https://scala.gg")
+@PluginDependencyComposite(
+    PluginDependency("scala-commons"),
+    PluginDependency("Lemon"),
+    PluginDependency("Cookie", soft = true),
+    PluginDependency("cloudsync", soft = true)
 )
 class FriendsSpigotPlugin : ExtendedScalaPlugin()
 {
