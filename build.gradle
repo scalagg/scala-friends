@@ -35,7 +35,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly "org.jetbrains.kotlin:kotlin-stdlib:1.7.10"
+    compileOnly "org.jetbrains.kotlin:kotlin-stdlib:1.7.20"
 
     compileOnly "gg.scala.basics.plugin:scala-basics-plugin:1.0.0"
     implementation "net.wesjd:anvilgui:1.5.3-SNAPSHOT"
