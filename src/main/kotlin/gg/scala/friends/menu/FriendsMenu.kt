@@ -111,8 +111,8 @@ class FriendsMenu(
                 "${CC.WHITE}${
                     TimeUtil.formatIntoFullCalendarString(
                         Date(
-                            lemonPlayer.getMetadata("last-connection")
-                                ?.asString()?.toLong() ?: System.currentTimeMillis()
+                            runCatching { lemonPlayer.getMetadata("last-connection")
+                                ?.asString()?.toLong() }.getOrNull() ?: System.currentTimeMillis()
                         )
                     )
                 }",
