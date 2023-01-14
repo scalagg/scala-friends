@@ -8,7 +8,9 @@ import gg.scala.commons.command.ScalaCommand
 import gg.scala.commons.issuer.ScalaPlayer
 import gg.scala.friends.menu.FriendsMenu
 import gg.scala.friends.menu.OtherPlayerProfileMenu
+import gg.scala.lemon.player.wrapper.AsyncLemonPlayer
 import java.util.*
+import java.util.concurrent.CompletableFuture
 
 /**
  * @author GrowlyX
@@ -20,17 +22,23 @@ class ProfileCommand : ScalaCommand()
     @CommandCompletion("@players")
     @CommandAlias("profile")
     fun onProfile(
-        player: ScalaPlayer, @Optional target: UUID?
-    )
+        player: ScalaPlayer, @Optional target: AsyncLemonPlayer?
+    ): CompletableFuture<Void>
     {
-        if (target != null)
+        if (target == null)
         {
-            OtherPlayerProfileMenu(target)
+            FriendsMenu(FriendsMenu.RenderState.PROFILE)
                 .openMenu(player.bukkit())
-            return
+            return CompletableFuture
+                .completedFuture(null)
         }
 
-        FriendsMenu(FriendsMenu.RenderState.PROFILE)
-            .openMenu(player.bukkit())
+        return target
+            .validatePlayers(
+                player.bukkit(), false
+            ) {
+                OtherPlayerProfileMenu(it.uniqueId)
+                    .openMenu(player.bukkit())
+            }
     }
 }

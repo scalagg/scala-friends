@@ -285,8 +285,9 @@ object KFriendHandler
                 }
         }
 
-
-        return AsyncLemonPlayer.of(uniqueId, false).future
+        return AsyncLemonPlayer
+            .of(uniqueId)
+            .computeNow()
             .thenApply {
                 if (it.isEmpty())
                 {

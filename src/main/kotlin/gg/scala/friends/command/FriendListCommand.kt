@@ -7,28 +7,31 @@ import gg.scala.commons.command.ScalaCommand
 import gg.scala.friends.handler.KPlayerHandler
 import gg.scala.friends.result.FriendPaginatedResult
 import org.bukkit.entity.Player
-import java.util.concurrent.ForkJoinPool
+import java.util.concurrent.CompletableFuture
 
 /**
  * @author GrowlyX
  * @since 11/12/2021
  */
 @AutoRegister
-class FriendListCommand : ScalaCommand()
+object FriendListCommand : ScalaCommand()
 {
     @CommandAlias("fl|flist")
-    fun onList(player: Player, @Optional page: Int?)
+    fun onList(
+        player: Player, @Optional page: Int?
+    ): CompletableFuture<Void>
     {
         val friendPlayer = KPlayerHandler.find(player)
             ?: throw RuntimeException()
 
-        ForkJoinPool.commonPool().execute {
-            FriendPaginatedResult.display(
-                sender = player,
-                results = friendPlayer.orderedFriends(),
-                page = page ?: 1,
-                command = "friend list %s"
-            )
-        }
+        return CompletableFuture
+            .runAsync {
+                FriendPaginatedResult.display(
+                    sender = player,
+                    results = friendPlayer.orderedFriends(),
+                    page = page ?: 1,
+                    command = "friend list %s"
+                )
+            }
     }
 }

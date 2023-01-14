@@ -9,6 +9,7 @@ import gg.scala.commons.acf.CommandHelp
 import gg.scala.commons.acf.annotation.*
 import gg.scala.commons.acf.annotation.Optional
 import gg.scala.friends.menu.FriendsMenu
+import gg.scala.lemon.player.wrapper.AsyncLemonPlayer
 import org.bukkit.entity.Player
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -37,46 +38,36 @@ class FriendCommand : ScalaCommand()
 
     @Subcommand("list")
     @Description("View all your friends.")
-    fun onList(player: Player, @Optional page: Int?)
-    {
-        val friendPlayer = KPlayerHandler.find(player)
-            ?: throw RuntimeException()
-
-        ForkJoinPool.commonPool().execute {
-            FriendPaginatedResult.display(
-                sender = player,
-                results = friendPlayer.orderedFriends(),
-                page = page ?: 1,
-                command = "friend list %s"
-            )
-        }
-    }
+    fun onList(player: Player, @Optional page: Int?) =
+        FriendListCommand.onList(player, page)
 
     @Default
     @Subcommand("add")
     @Syntax("<player>")
     @CommandCompletion("@all-players")
     @Description("Send a friend request to a player.")
-    fun onAdd(player: Player, target: UUID): CompletableFuture<Void>
-    {
-        return KFriendHandler.attemptDispatchFriendRequestTo(player, target)
-    }
+    fun onAdd(player: Player, target: AsyncLemonPlayer) =
+        target.validatePlayers(player, false) {
+            KFriendHandler
+                .attemptDispatchFriendRequestTo(player, it.uniqueId)
+                .join()
+        }
 
     @Syntax("<player>")
     @Subcommand("remove|delete")
     @CommandCompletion("@all-players")
     @Description("Remove a player from your friends list.")
-    fun onRemove(player: Player, target: UUID)
-    {
-        KFriendHandler.attemptFriendRemoval(player, target)
-    }
+    fun onRemove(player: Player, target: AsyncLemonPlayer) =
+        target.validatePlayers(player, false) {
+            KFriendHandler.attemptFriendRemoval(player, it.uniqueId)
+        }
 
     @Syntax("<player>")
     @Subcommand("accept")
     @CommandCompletion("@all-players")
     @Description("Accept a player's friend request.")
-    fun onAccept(player: Player, target: UUID)
-    {
-        KFriendHandler.attemptFriendRequestAcceptFrom(player, target)
-    }
+    fun onAccept(player: Player, target: AsyncLemonPlayer) =
+        target.validatePlayers(player, false) {
+            KFriendHandler.attemptFriendRequestAcceptFrom(player, it.uniqueId)
+        }
 }
