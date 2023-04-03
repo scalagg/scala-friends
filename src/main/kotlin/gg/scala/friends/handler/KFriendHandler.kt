@@ -13,6 +13,7 @@ import gg.scala.lemon.util.QuickAccess
 import gg.scala.lemon.util.QuickAccess.username
 import gg.scala.store.controller.DataStoreObjectControllerCache
 import gg.scala.store.storage.type.DataStoreStorageType
+import net.evilblock.cubed.ScalaCommonsSpigot
 import net.evilblock.cubed.util.CC
 import net.evilblock.cubed.util.bukkit.Constants
 import net.evilblock.cubed.util.bukkit.FancyMessage
@@ -122,7 +123,7 @@ object KFriendHandler
     }
 
     val cacheConn by lazy {
-        Lemon.instance.aware.internal().connect()!!
+        ScalaCommonsSpigot.instance.kvConnection
     }
 
     private fun internalHandleFriendRequestDispatch(
@@ -145,20 +146,18 @@ object KFriendHandler
                 "/friend accept ${player.name}"
             )
 
-            Lemon.instance.aware.internal().apply {
-                val requestKey =
-                    "friends:requests:$uniqueId:${player.uniqueId}"
+            val requestKey =
+                "friends:requests:$uniqueId:${player.uniqueId}"
 
-                cacheConn.sync().hset(
-                    requestKey, player.uniqueId.toString(),
-                    System.currentTimeMillis().toString()
-                )
+            cacheConn.sync().hset(
+                requestKey, player.uniqueId.toString(),
+                System.currentTimeMillis().toString()
+            )
 
-                cacheConn.sync().expire(
-                    requestKey,
-                    TimeUnit.MINUTES.toSeconds(5L)
-                )
-            }
+            cacheConn.sync().expire(
+                requestKey,
+                TimeUnit.MINUTES.toSeconds(5L)
+            )
 
             QuickAccess.sendGlobalPlayerFancyMessage(
                 fancyMessage = message, uuid = uniqueId
