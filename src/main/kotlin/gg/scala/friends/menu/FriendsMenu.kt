@@ -370,16 +370,13 @@ class FriendsMenu(
 
         for (request in outgoing)
         {
+            val uniqueId = UUID.fromString(request.key)
+
             val username = CubedCacheUtil
-                .fetchName(request.second)!!
+                .fetchName(uniqueId)
+                ?: continue
 
-            val key = request.first
-
-            val requestTime = KFriendHandler.cacheConn
-                .sync().hget(
-                    key, player.uniqueId.toString()
-                )
-                .toLong()
+            val requestTime = request.value
 
             buttons[buttons.size] = ItemBuilder
                 .of(Material.SKULL_ITEM)
@@ -401,10 +398,10 @@ class FriendsMenu(
                 .toButton { _, type ->
                     if (type!!.name.contains("RIGHT"))
                     {
-                        KFriendHandler.cacheConn
-                            .sync().hdel(
-                                key, player.uniqueId.toString()
-                            )
+                        KFriendHandler.cacheConn.apply {
+                            sync().hdel("friends:requests:outgoing:${player.uniqueId}", uniqueId.toString())
+                            sync().hdel("friends:requests:incoming:${uniqueId}", player.uniqueId.toString())
+                        }
 
                         player.sendMessage(
                             "${CC.GREEN}Cancelled friend request to $username."

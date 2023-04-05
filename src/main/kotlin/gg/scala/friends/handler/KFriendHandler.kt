@@ -105,21 +105,25 @@ object KFriendHandler
         player: Player, uniqueId: UUID, username: String
     ): CompletableFuture<Void>
     {
-        return hasOutgoingFriendRequestFrom(player.uniqueId, uniqueId).thenCompose {
-            if (it)
-            {
-                throw ConditionFailedException("${CC.RED}You've already sent a friend request to ${CC.YELLOW}$username${CC.RED}, please wait.")
+        return CompletableFuture
+            .supplyAsync {
+                hasOutgoingFriendRequestFrom(player.uniqueId, uniqueId)
             }
-
-            retrieveFriendRequestStatus(uniqueId).thenCompose { disabled ->
-                if (disabled)
+            .thenCompose {
+                if (it)
                 {
-                    throw ConditionFailedException("${CC.YELLOW}$username${CC.RED} has their friend requests disabled.")
+                    throw ConditionFailedException("${CC.RED}You've already sent a friend request to ${CC.YELLOW}$username${CC.RED}, please wait.")
                 }
 
-                internalHandleFriendRequestDispatch(player, uniqueId, username)
+                retrieveFriendRequestStatus(uniqueId).thenCompose { disabled ->
+                    if (disabled)
+                    {
+                        throw ConditionFailedException("${CC.YELLOW}$username${CC.RED} has their friend requests disabled.")
+                    }
+
+                    internalHandleFriendRequestDispatch(player, uniqueId, username)
+                }
             }
-        }
     }
 
     val cacheConn by lazy {
@@ -146,17 +150,15 @@ object KFriendHandler
                 "/friend accept ${player.name}"
             )
 
-            val requestKey =
-                "friends:requests:$uniqueId:${player.uniqueId}"
-
+            val requestKey = "friends:requests:outgoing:${player.uniqueId}"
             cacheConn.sync().hset(
-                requestKey, player.uniqueId.toString(),
-                System.currentTimeMillis().toString()
+                requestKey, uniqueId.toString(),
+                "${System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5L)}"
             )
 
-            cacheConn.sync().expire(
-                requestKey,
-                TimeUnit.MINUTES.toSeconds(5L)
+            cacheConn.sync().hset(
+                "friends:requests:incoming:${uniqueId}", player.uniqueId.toString(),
+                "${System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5L)}"
             )
 
             QuickAccess.sendGlobalPlayerFancyMessage(
@@ -184,14 +186,18 @@ object KFriendHandler
             throw ConditionFailedException("You already have ${CC.YELLOW}$username${CC.RED} added as a friend.")
         }
 
-        return hasOutgoingFriendRequestFrom(uniqueId, player.uniqueId).thenCompose {
-            if (!it)
-            {
-                throw ConditionFailedException("${CC.RED}You don't have a friend request from ${CC.YELLOW}$username${CC.RED}.")
+        return CompletableFuture
+            .supplyAsync {
+                hasOutgoingFriendRequestFrom(uniqueId, player.uniqueId)
             }
+            .thenCompose {
+                if (!it)
+                {
+                    throw ConditionFailedException("${CC.RED}You don't have a friend request from ${CC.YELLOW}$username${CC.RED}.")
+                }
 
-            internalHandleFriendRequestAccept(player, uniqueId, username)
-        }
+                internalHandleFriendRequestAccept(player, uniqueId, username)
+            }
     }
 
     private fun internalHandleFriendRequestAccept(
@@ -206,7 +212,8 @@ object KFriendHandler
             friendPlayer.save()
 
             cacheConn.apply {
-                sync().hdel("friends:requests:${player.uniqueId}:$uniqueId", uniqueId.toString())
+                sync().hdel("friends:requests:incoming:${player.uniqueId}", uniqueId.toString())
+                sync().hdel("friends:requests:outgoing:${uniqueId}", player.uniqueId.toString())
             }
 
             RedisHandler.buildMessage(
@@ -297,42 +304,21 @@ object KFriendHandler
             }
     }
 
-    private fun hasOutgoingFriendRequestFrom(requester: UUID, target: UUID): CompletableFuture<Boolean>
+    private fun hasOutgoingFriendRequestFrom(requester: UUID, target: UUID): Boolean
     {
-        return CompletableFuture.supplyAsync {
-            var exists: Boolean
+        val outgoing = cacheConn.sync()
+            .hget(
+                "friends:requests:outgoing:$requester",
+                target.toString()
+            )
 
-            cacheConn.apply {
-                exists = sync()
-                    .hget("friends:requests:$target:$requester", requester.toString()) != null
-            }
-
-            exists
-        }
+        return !(outgoing == null || outgoing.toLong() < System.currentTimeMillis())
     }
 
-    fun getOutgoingFriendRequests(requester: UUID): List<Pair<String, UUID>>
-    {
-        val requests = mutableListOf<Pair<String, UUID>>()
-
-        val keys = this.cacheConn.sync()
-            .keys("friends:requests:*")
-
-        for (key in keys)
-        {
-            val split = key
-                .split(":")
-                .toMutableList()
-
-            if (key.contains(requester.toString()))
-            {
-                requests += key to UUID
-                    .fromString(
-                        split[2]
-                    )
-            }
+    fun getOutgoingFriendRequests(requester: UUID) = cacheConn.sync()
+        .hgetall("friends:requests:outgoing:$requester")
+        .mapValues { it.value.toLong() }
+        .filterValues {
+            it > System.currentTimeMillis()
         }
-
-        return requests
-    }
 }
