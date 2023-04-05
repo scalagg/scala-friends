@@ -390,7 +390,7 @@ class FriendsMenu(
                                 requestTime - System.currentTimeMillis(),
                                 true, true
                             )
-                    } ago",
+                    }",
                     "",
                     "${CC.RED}Right-Click to cancel!"
                 )
