@@ -383,11 +383,11 @@ class FriendsMenu(
                 .owner(username)
                 .name("${CC.YELLOW}$username")
                 .addToLore(
-                    "${CC.GRAY}Requested:",
+                    "${CC.GRAY}Time left:",
                     "${CC.WHITE}${
                         DurationFormatUtils
                             .formatDurationWords(
-                                System.currentTimeMillis() - requestTime,
+                                requestTime - System.currentTimeMillis(),
                                 true, true
                             )
                     } ago",
