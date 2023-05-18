@@ -1,0 +1,144 @@
+package gg.scala.friends.menu
+
+import gg.scala.flavor.inject.Inject
+import gg.scala.flavor.service.Service
+import gg.scala.friends.FriendsSpigotPlugin
+import gg.scala.friends.handler.KFriendHandler
+import gg.scala.friends.menu.template.impl.ProfileSinglePageMenu
+import gg.scala.lemon.handler.PlayerHandler
+import gg.scala.lemon.player.LemonPlayer
+import gg.scala.lemon.util.CubedCacheUtil
+import net.evilblock.cubed.menu.Button
+import net.evilblock.cubed.menu.pagination.PaginatedMenu
+import net.evilblock.cubed.util.CC
+import net.evilblock.cubed.util.bukkit.ItemBuilder
+import net.evilblock.cubed.util.bukkit.Tasks
+import net.wesjd.anvilgui.AnvilGUI
+import org.bukkit.Material
+import org.bukkit.entity.Player
+
+/**
+ * @author GrowlyX
+ * @since 5/17/2023
+ */
+@Service
+object FriendUIService
+{
+    @Inject
+    lateinit var plugin: FriendsSpigotPlugin
+
+    private val buttonMappings = mutableListOf(
+        { _: Player, _: LemonPlayer ->
+            ItemBuilder
+                .of(Material.EMERALD)
+                .name("${CC.GREEN}Your Profile")
+                .addToLore(
+                    "${CC.GRAY}Tier: ${CC.AQUA}4",
+                    "${CC.GRAY}Rank: ${CC.GREEN}VIP${CC.GOLD}+",
+                    "",
+                    "${CC.GRAY}First joined: ${CC.WHITE}10 days ago"
+                )
+                .toButton { player, _ ->
+                    ProfileSinglePageMenu()
+                        .openMenu(player!!)
+                }
+        },
+        { _: Player, _: LemonPlayer ->
+            ItemBuilder
+                .of(Material.FIREBALL)
+                .name("${CC.GOLD}Your Friends")
+                .addToLore(
+                    "${CC.GRAY}View all of your added",
+                    "${CC.GRAY}friends!"
+                )
+                .toButton()
+        },
+        { _: Player, _: LemonPlayer ->
+            ItemBuilder
+                .of(Material.NETHER_STAR)
+                .name("${CC.WHITE}Your Friend Requests")
+                .addToLore(
+                    "${CC.GRAY}View all of your outgoing",
+                    "${CC.GRAY}and incoming friend requests!"
+                )
+                .toButton()
+        },
+        { _: Player, _: LemonPlayer ->
+            ItemBuilder
+                .of(Material.ANVIL)
+                .name("${CC.D_GRAY}Send Friend Request")
+                .addToLore(
+                    "${CC.GRAY}Send out a friend request",
+                    "${CC.GRAY}to a user on the network!"
+                )
+                .toButton { player, _ ->
+                    AnvilGUI.Builder()
+                        .onClose {
+                            Tasks.delayed(1L) {
+                                ProfileSinglePageMenu().openMenu(player!!)
+                            }
+                        }
+                        .onComplete { _, u ->
+                            val uniqueId = CubedCacheUtil
+                                .fetchUuid(u)
+                                ?: return@onComplete kotlin.run {
+                                    player!!.sendMessage("${CC.RED}Invalid player!")
+                                    AnvilGUI.Response.close()
+                                }
+
+                            KFriendHandler
+                                .attemptDispatchFriendRequestTo(
+                                    player!!, uniqueId
+                                )
+                                .exceptionally {
+                                    if (it.message!!.startsWith(
+                                            "gg.scala.commons.acf.ConditionFailedException: "
+                                        )
+                                    )
+                                    {
+                                        player.sendMessage(
+                                            it.message!!.removePrefix(
+                                                "gg.scala.commons.acf.ConditionFailedException: "
+                                            )
+                                        )
+                                    }
+
+                                    return@exceptionally null
+                                }
+
+                            return@onComplete AnvilGUI.Response.close()
+                        }
+                        .text("Enter a username...")
+                        .plugin(plugin)
+                        .open(player)
+                }
+        }
+    )
+
+    fun updateButtonMapping(
+        index: Int,
+        lambda: (Player, LemonPlayer) -> Button
+    ) = buttonMappings
+        .apply {
+            this[index] = lambda
+        }
+
+    fun populate(
+        player: Player,
+        buttons: MutableMap<Int, Button>
+    )
+    {
+        val profile = PlayerHandler
+            .find(player.uniqueId)
+            ?: return
+
+        for (i in 0..3)
+        {
+            buttons[1 + (i * 9)] =
+                PaginatedMenu.PLACEHOLDER
+
+            buttons[i * 9] =
+                buttonMappings[i](player, profile)
+        }
+    }
+}

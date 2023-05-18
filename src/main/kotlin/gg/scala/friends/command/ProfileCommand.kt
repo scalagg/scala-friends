@@ -8,6 +8,7 @@ import gg.scala.commons.command.ScalaCommand
 import gg.scala.commons.issuer.ScalaPlayer
 import gg.scala.friends.menu.FriendsMenu
 import gg.scala.friends.menu.OtherPlayerProfileMenu
+import gg.scala.friends.menu.template.impl.ProfileSinglePageMenu
 import gg.scala.lemon.player.wrapper.AsyncLemonPlayer
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -17,7 +18,7 @@ import java.util.concurrent.CompletableFuture
  * @since 7/14/2022
  */
 @AutoRegister
-class ProfileCommand : ScalaCommand()
+object ProfileCommand : ScalaCommand()
 {
     @CommandCompletion("@players")
     @CommandAlias("profile")
@@ -27,7 +28,7 @@ class ProfileCommand : ScalaCommand()
     {
         if (target == null)
         {
-            FriendsMenu(FriendsMenu.RenderState.PROFILE)
+            ProfileSinglePageMenu()
                 .openMenu(player.bukkit())
             return CompletableFuture
                 .completedFuture(null)
