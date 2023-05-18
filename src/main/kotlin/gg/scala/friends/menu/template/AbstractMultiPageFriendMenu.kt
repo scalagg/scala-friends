@@ -38,6 +38,11 @@ abstract class AbstractMultiPageFriendMenu(
                 .toTypedArray()
     }
 
+    init
+    {
+        applyHeader = false
+    }
+
     abstract fun configureMenuItems(
         player: Player,
         buttons: MutableMap<Int, Button>

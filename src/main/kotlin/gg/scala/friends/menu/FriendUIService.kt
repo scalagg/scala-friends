@@ -154,13 +154,6 @@ object FriendUIService
             .find(player.uniqueId)
             ?: return
 
-        for (i in 0..9)
-        {
-            buttons[i] = ItemBuilder
-                .of(Material.AIR)
-                .toButton()
-        }
-
         for (i in 0..3)
         {
             buttons[1 + (i * 9)] =
