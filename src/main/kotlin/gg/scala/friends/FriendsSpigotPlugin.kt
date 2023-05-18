@@ -15,6 +15,9 @@ import gg.scala.commons.core.plugin.PluginWebsite
 import gg.scala.friends.handler.KFriendHandler
 import gg.scala.friends.statistics.StatisticRetrievalResult
 import gg.scala.friends.statistics.StatisticsSupplier
+import gg.scala.friends.statistics.defaults.PracticeStatisticsSupplier
+import gg.scala.friends.statistics.defaults.UHCHostedStatisticsSupplier
+import gg.scala.friends.statistics.defaults.UHCStatisticsSupplier
 import gg.scala.lemon.LemonConstants
 import gg.scala.store.controller.DataStoreObjectControllerCache
 import gg.scala.store.storage.storable.IDataStoreObject
@@ -59,13 +62,9 @@ class FriendsSpigotPlugin : ExtendedScalaPlugin()
     {
         if (LemonConstants.SERVER_NAME != "Minequest")
         {
-            this.packageIndexer
-                .getSubTypes<StatisticsSupplier<out IDataStoreObject>>()
-                .mapNotNull { it.objectInstance() }
-                .forEach {
-                    this.suppliers.add(it as StatisticsSupplier<out IDataStoreObject>)
-                    this.logger.info("Loaded stats supplier: ${it.javaClass.simpleName}")
-                }
+            this.suppliers.add(PracticeStatisticsSupplier)
+            this.suppliers.add(UHCStatisticsSupplier)
+            this.suppliers.add(UHCHostedStatisticsSupplier)
         }
 
         this.aware.listen(KFriendHandler)
@@ -81,6 +80,9 @@ class FriendsSpigotPlugin : ExtendedScalaPlugin()
             }
         }.thenRun {
             logger.info("Completed pre-load for statistic containers.")
+        }.exceptionally {
+            it.printStackTrace()
+            return@exceptionally null
         }
 
         server.scheduler.runTaskTimerAsynchronously(this,

@@ -5,6 +5,7 @@ import gg.scala.friends.statistics.StatisticsSupplier
 import gg.scala.store.controller.DataStoreObjectControllerCache
 import gg.scala.store.storage.storable.IDataStoreObject
 import net.evilblock.cubed.util.CC
+import net.evilblock.cubed.util.math.Numbers
 import java.util.*
 
 /**
@@ -18,19 +19,19 @@ object PracticeStatisticsSupplier : StatisticsSupplier<PracticePlayer>()
         val practicePlayer = model as PracticePlayer
         val description = mutableListOf<String>()
 
-        description += "${CC.GRAY}Total played: ${CC.WHITE}${practicePlayer.totalPlayed}"
-        description += "${CC.GRAY}Total wins: ${CC.WHITE}${practicePlayer.totalWins}"
-        description += "${CC.GRAY}Total losses: ${CC.WHITE}${practicePlayer.totalLosses}"
+        description += "${CC.GRAY}Total played: ${CC.WHITE}${practicePlayer.totalPlayed.fmt()}"
+        description += "${CC.GRAY}Total wins: ${CC.WHITE}${practicePlayer.totalWins.fmt()}"
+        description += "${CC.GRAY}Total losses: ${CC.WHITE}${practicePlayer.totalLosses.fmt()}"
         description += ""
-        description += "${CC.GRAY}Unranked played: ${CC.WHITE}${practicePlayer.unrankedPlayed}"
-        description += "${CC.GRAY}Unranked wins: ${CC.WHITE}${practicePlayer.unrankedWinCount}"
-        description += "${CC.GRAY}Unranked losses: ${CC.WHITE}${practicePlayer.unrankedLossCount}"
+        description += "${CC.GRAY}Unranked played: ${CC.WHITE}${practicePlayer.unrankedPlayed.fmt()}"
+        description += "${CC.GRAY}Unranked wins: ${CC.WHITE}${practicePlayer.unrankedWinCount.fmt()}"
+        description += "${CC.GRAY}Unranked losses: ${CC.WHITE}${practicePlayer.unrankedLossCount.fmt()}"
         description += ""
-        description += "${CC.GRAY}Global elo: ${CC.WHITE}${practicePlayer.globalElo}"
+        description += "${CC.GRAY}Global elo: ${CC.WHITE}${practicePlayer.globalElo.fmt()}"
         description += ""
-        description += "${CC.GRAY}Ranked played: ${CC.WHITE}${practicePlayer.rankedPlayed}"
-        description += "${CC.GRAY}Ranked wins: ${CC.WHITE}${practicePlayer.rankedWinCount}"
-        description += "${CC.GRAY}Ranked losses: ${CC.WHITE}${practicePlayer.rankedLossCount}"
+        description += "${CC.GRAY}Ranked played: ${CC.WHITE}${practicePlayer.rankedPlayed.fmt()}"
+        description += "${CC.GRAY}Ranked wins: ${CC.WHITE}${practicePlayer.rankedWinCount.fmt()}"
+        description += "${CC.GRAY}Ranked losses: ${CC.WHITE}${practicePlayer.rankedLossCount.fmt()}"
         description += ""
         description += "${CC.GRAY}W/L ratio: ${CC.WHITE}${"%.2f".format(practicePlayer.winLossRatio)}"
 
@@ -44,43 +45,8 @@ object PracticeStatisticsSupplier : StatisticsSupplier<PracticePlayer>()
     override fun gameModeIcon() = XMaterial.DIAMOND_SWORD
 }
 
-object UHCStatisticsSupplier : StatisticsSupplier<UHCPlayerModel>()
-{
-    override fun render(model: IDataStoreObject): List<String>
-    {
-        val practicePlayer = model as UHCPlayerModel
-        val description = mutableListOf<String>()
+fun Int.fmt() = Numbers.format(this)
 
-        description += "${CC.GRAY}Total played: ${CC.WHITE}${practicePlayer.played.value}"
-        description += "${CC.GRAY}Total wins: ${CC.WHITE}${practicePlayer.wins.value}"
-        description += "${CC.GRAY}Total losses: ${CC.WHITE}${practicePlayer.losses.value}"
-        description += ""
-        description += "${CC.GRAY}Total kills: ${CC.WHITE}${practicePlayer.kills.value}"
-        description += "${CC.GRAY}Total deaths: ${CC.WHITE}${practicePlayer.deaths.value}"
-        description += ""
-        description += "${CC.GRAY}W/L ratio: ${CC.WHITE}${"%.2f".format(practicePlayer.winLossRatio)}"
-        description += "${CC.GRAY}K/D ratio: ${CC.WHITE}${"%.2f".format(practicePlayer.killDeathRatio)}"
-
-        return description
-    }
-
-    override fun controller() = DataStoreObjectControllerCache.findNotNull<UHCPlayerModel>()
-    override fun getDataModel() = UHCPlayerModel::class
-
-    override fun gameModeName() = "UHC"
-    override fun gameModeIcon() = XMaterial.GOLDEN_APPLE
-}
-
-object UHCHostedStatisticsSupplier : StatisticsSupplier<UHCHostedPlayerModel>()
-{
-    override fun render(model: IDataStoreObject) = listOf<String>()
-
-    override fun controller() = DataStoreObjectControllerCache.findNotNull<UHCHostedPlayerModel>()
-    override fun getDataModel() = UHCHostedPlayerModel::class
-
-    override fun gameModeName() = "Hosted UHC"
-    override fun gameModeIcon() = XMaterial.ENCHANTED_BOOK
-}
 
 data class ImmutableValue(val value: Int)
 

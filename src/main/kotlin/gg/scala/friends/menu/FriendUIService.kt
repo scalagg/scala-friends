@@ -13,9 +13,13 @@ import net.evilblock.cubed.menu.pagination.PaginatedMenu
 import net.evilblock.cubed.util.CC
 import net.evilblock.cubed.util.bukkit.ItemBuilder
 import net.evilblock.cubed.util.bukkit.Tasks
+import net.evilblock.cubed.util.time.DateUtil
+import net.evilblock.cubed.util.time.TimeUtil
 import net.wesjd.anvilgui.AnvilGUI
+import org.apache.commons.lang.time.DurationFormatUtils
 import org.bukkit.Material
 import org.bukkit.entity.Player
+import java.util.*
 
 /**
  * @author GrowlyX
@@ -28,15 +32,29 @@ object FriendUIService
     lateinit var plugin: FriendsSpigotPlugin
 
     private val buttonMappings = mutableListOf(
-        { _: Player, _: LemonPlayer ->
+        { _: Player, profile: LemonPlayer ->
             ItemBuilder
                 .of(Material.EMERALD)
                 .name("${CC.GREEN}Your Profile")
                 .addToLore(
-                    "${CC.GRAY}Tier: ${CC.AQUA}4",
-                    "${CC.GRAY}Rank: ${CC.GREEN}VIP${CC.GOLD}+",
+                    "${CC.GRAY}Tier: ${CC.AQUA}N/A",
                     "",
-                    "${CC.GRAY}First joined: ${CC.WHITE}10 days ago"
+                    "${CC.GRAY}Playtime: ${CC.WHITE}${
+                        TimeUtil.formatIntoMMSS(
+                            (profile.pastLogins.values.sum() / 1000).toInt()
+                        )
+                    }",
+                    "${CC.GRAY}Rank: ${CC.GREEN}${
+                        profile.activeGrant?.getRank()?.prefix
+                    }",
+                    "",
+                    "${CC.GRAY}First login:",
+                    "${CC.WHITE}${
+                        DateUtil.formatSimplifiedDateDiff(
+                            profile.getMetadata("first-connection")
+                                ?.asString()?.toLong() ?: System.currentTimeMillis()
+                        )
+                    } ago"
                 )
                 .toButton { player, _ ->
                     ProfileSinglePageMenu()
