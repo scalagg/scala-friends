@@ -1,6 +1,8 @@
 package gg.scala.friends.menu.template.impl
 
 import gg.scala.friends.handler.KPlayerHandler
+import gg.scala.friends.menu.FriendUIService
+import gg.scala.friends.menu.FriendsMenu
 import gg.scala.friends.menu.template.AbstractSinglePageFriendMenu
 import gg.scala.friends.socials.SocialMediaProvider
 import gg.scala.friends.socials.SocialMediaTexturedButton
@@ -78,6 +80,53 @@ class ProfileSinglePageMenu : AbstractSinglePageFriendMenu("Your Profile")
                             }
                     }.start(player)
                 }
+        }
+
+        for ((index, supplier) in FriendUIService.plugin.suppliers.withIndex())
+        {
+            val stats = supplier
+                .cache[player.uniqueId]
+
+            if (stats == null)
+            {
+                buttons[22 + index] =
+                    ItemBuilder
+                        .of(supplier.gameModeIcon())
+                        .name("${CC.RED}${supplier.gameModeName()}")
+                        .addToLore(
+                            "${CC.GRAY}Your statistics for ${supplier.gameModeName()}",
+                            "${CC.GRAY}have not yet loaded.",
+                            "",
+                            "${CC.RED}Please wait a moment${FriendUIService.plugin.loadingString}"
+                        )
+                        .toButton()
+                continue
+            }
+
+            if (!stats.loggedIn)
+            {
+                buttons[22 + index] =
+                    ItemBuilder
+                        .of(supplier.gameModeIcon())
+                        .name("${CC.GREEN}${supplier.gameModeName()}")
+                        .addToLore(
+                            "${CC.GRAY}You haven't joined our",
+                            "${CC.GRAY}${supplier.gameModeName().lowercase()} server yet!"
+                        )
+                        .toButton()
+                continue
+            }
+
+            buttons[22 + index] =
+                ItemBuilder
+                    .of(supplier.gameModeIcon())
+                    .name("${CC.GREEN}${supplier.gameModeName()}")
+                    .setLore(
+                        stats.render ?: listOf(
+                            "${CC.RED}Something went wrong. Contact an admin."
+                        )
+                    )
+                    .toButton()
         }
     }
 }
