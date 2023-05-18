@@ -66,11 +66,11 @@ class OtherPlayerProfileMenu(
         buttons[4] = ItemBuilder
             .of(Material.SKULL_ITEM)
             .data(3)
-            .name("${CC.B_GREEN}${
+            .name("${CC.GREEN}${
                 this.target.username()
             }")
             .addToLore(
-                "${CC.WHITE}Rank: ${
+                "${CC.GRAY}Rank: ${
                     this.rank?.getColoredName(false) ?: "${CC.RED}Loading..."
                 }",
                 "",

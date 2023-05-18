@@ -4,6 +4,8 @@ import gg.scala.flavor.inject.Inject
 import gg.scala.flavor.service.Service
 import gg.scala.friends.FriendsSpigotPlugin
 import gg.scala.friends.handler.KFriendHandler
+import gg.scala.friends.menu.template.impl.FriendRequestListMultiPageMenu
+import gg.scala.friends.menu.template.impl.FriendsListMultiPageMenu
 import gg.scala.friends.menu.template.impl.ProfileSinglePageMenu
 import gg.scala.lemon.handler.PlayerHandler
 import gg.scala.lemon.player.LemonPlayer
@@ -16,10 +18,8 @@ import net.evilblock.cubed.util.bukkit.Tasks
 import net.evilblock.cubed.util.time.DateUtil
 import net.evilblock.cubed.util.time.TimeUtil
 import net.wesjd.anvilgui.AnvilGUI
-import org.apache.commons.lang.time.DurationFormatUtils
 import org.bukkit.Material
 import org.bukkit.entity.Player
-import java.util.*
 
 /**
  * @author GrowlyX
@@ -69,7 +69,9 @@ object FriendUIService
                     "${CC.GRAY}View all of your added",
                     "${CC.GRAY}friends!"
                 )
-                .toButton()
+                .toButton { player, _ ->
+                    FriendsListMultiPageMenu().openMenu(player!!)
+                }
         },
         { _: Player, _: LemonPlayer ->
             ItemBuilder
@@ -79,7 +81,9 @@ object FriendUIService
                     "${CC.GRAY}View all of your outgoing",
                     "${CC.GRAY}and incoming friend requests!"
                 )
-                .toButton()
+                .toButton { player, _ ->
+                    FriendRequestListMultiPageMenu().openMenu(player!!)
+                }
         },
         { _: Player, _: LemonPlayer ->
             ItemBuilder
@@ -149,6 +153,13 @@ object FriendUIService
         val profile = PlayerHandler
             .find(player.uniqueId)
             ?: return
+
+        for (i in 0..9)
+        {
+            buttons[i] = ItemBuilder
+                .of(Material.AIR)
+                .toButton()
+        }
 
         for (i in 0..3)
         {

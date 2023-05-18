@@ -1,20 +1,14 @@
 package gg.scala.friends.command
 
-import gg.scala.commons.annotations.commands.AutoRegister
-import gg.scala.commons.command.ScalaCommand
-import gg.scala.friends.handler.KFriendHandler
-import gg.scala.friends.handler.KPlayerHandler
-import gg.scala.friends.result.FriendPaginatedResult
 import gg.scala.commons.acf.CommandHelp
 import gg.scala.commons.acf.annotation.*
 import gg.scala.commons.acf.annotation.Optional
-import gg.scala.friends.menu.FriendsMenu
-import gg.scala.friends.menu.template.impl.ProfileSinglePageMenu
+import gg.scala.commons.annotations.commands.AutoRegister
+import gg.scala.commons.command.ScalaCommand
+import gg.scala.friends.handler.KFriendHandler
 import gg.scala.lemon.player.wrapper.AsyncLemonPlayer
 import org.bukkit.entity.Player
 import java.util.*
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.ForkJoinPool
 
 /**
  * @author GrowlyX

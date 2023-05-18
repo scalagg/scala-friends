@@ -6,7 +6,6 @@ import gg.scala.commons.acf.annotation.Optional
 import gg.scala.commons.annotations.commands.AutoRegister
 import gg.scala.commons.command.ScalaCommand
 import gg.scala.commons.issuer.ScalaPlayer
-import gg.scala.friends.menu.FriendsMenu
 import gg.scala.friends.menu.OtherPlayerProfileMenu
 import gg.scala.friends.menu.template.impl.ProfileSinglePageMenu
 import gg.scala.lemon.player.wrapper.AsyncLemonPlayer

@@ -2,7 +2,6 @@ package gg.scala.friends.menu.template.impl
 
 import gg.scala.friends.handler.KPlayerHandler
 import gg.scala.friends.menu.FriendUIService
-import gg.scala.friends.menu.FriendsMenu
 import gg.scala.friends.menu.template.AbstractSinglePageFriendMenu
 import gg.scala.friends.socials.SocialMediaProvider
 import gg.scala.friends.socials.SocialMediaTexturedButton
