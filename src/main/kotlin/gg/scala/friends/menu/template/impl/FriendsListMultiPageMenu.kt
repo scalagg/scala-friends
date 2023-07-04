@@ -44,7 +44,7 @@ class FriendsListMultiPageMenu : AbstractMultiPageFriendMenu("Your Friends")
                 .of(Material.SKULL_ITEM)
                 .owner(username)
                 .name(
-                    "${CC.YELLOW}$username${
+                    "${CC.GREEN}$username${
                         if (bestFriend) "${CC.GRAY} (Best Friend)" else ""
                     }"
                 )
@@ -55,20 +55,36 @@ class FriendsListMultiPageMenu : AbstractMultiPageFriendMenu("Your Friends")
                         )
                     }",
                     "",
-                    "${CC.GRAY}Online: ${
-                        if (QuickAccess.online(friend.key).join())
-                            "${CC.GREEN}Yes" else "${CC.RED}No"
-                    }",
-                    "${CC.GRAY}Last seen: ${
-                        TimeUtil.formatIntoDateString(
-                            Date(
-                                QuickAccess.getLastOnline(friend.key).join() ?: System.currentTimeMillis()
-                            )
-                        )
-                    }",
-                    ""
                 )
                 .apply {
+                    if (
+                        !QuickAccess
+                            .online(friend.key)
+                            .join()
+                        )
+                    {
+                        addToLore(
+                            "${CC.RED}Player offline",
+                            "${CC.RED}Last seen: ${CC.WHITE}${
+                                TimeUtil.formatIntoAbbreviatedString(
+                                    ((System.currentTimeMillis() - (QuickAccess.getLastOnline(friend.key).join()
+                                        ?: System.currentTimeMillis())) / 1000).toInt()
+                                )
+                            } ago"
+                        )
+                    } else
+                    {
+                        addToLore(
+                            "${CC.D_GREEN}Player online",
+                            "${CC.D_GREEN}Server: ${CC.WHITE}${
+                                QuickAccess.server(friend.key).join()?.id ?: "Private"
+                            }"
+                        )
+                    }
+                }
+                .apply {
+                    addToLore("")
+
                     if (bestFriend)
                     {
                         addToLore(

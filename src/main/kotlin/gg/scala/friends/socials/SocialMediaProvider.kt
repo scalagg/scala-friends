@@ -22,9 +22,9 @@ enum class SocialMediaProvider(
     ),
     Discord(
         color = ChatColor.BLUE,
-        regex = "^.{3,32}#[0-9]{4}\$".toRegex(),
+        regex = "^.{3,32}".toRegex(),
         skinSignature = Constants.DISCORD_ICON,
-        example = "Example#0001"
+        example = "example"
     ),
     Twitter(
         color = ChatColor.AQUA,

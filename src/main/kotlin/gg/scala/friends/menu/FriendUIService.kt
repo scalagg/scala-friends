@@ -37,15 +37,16 @@ object FriendUIService
                 .of(Material.EMERALD)
                 .name("${CC.GREEN}Your Profile")
                 .addToLore(
-                    "${CC.GRAY}Tier: ${CC.AQUA}N/A",
+                    "${CC.GRAY}Level: ${CC.GOLD}0",
+                    "${CC.GRAY}Experience: ${CC.GREEN}0",
                     "",
                     "${CC.GRAY}Playtime: ${CC.WHITE}${
-                        TimeUtil.formatIntoMMSS(
+                        TimeUtil.formatIntoAbbreviatedString(
                             (profile.pastLogins.values.sum() / 1000).toInt()
                         )
                     }",
                     "${CC.GRAY}Rank: ${CC.GREEN}${
-                        profile.activeGrant?.getRank()?.prefix
+                        profile.activeGrant?.getRank()?.getColoredName()
                     }",
                     "",
                     "${CC.GRAY}First login:",
