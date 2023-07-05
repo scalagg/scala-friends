@@ -39,7 +39,7 @@ class FriendRequestListMultiPageMenu : AbstractMultiPageFriendMenu("Your Friend 
             buttons[buttons.size] = ItemBuilder
                 .of(Material.SKULL_ITEM)
                 .owner(username)
-                .name("${CC.YELLOW}$username")
+                .name("${CC.GREEN}$username")
                 .addToLore(
                     "${CC.GRAY}Time left:",
                     "${CC.WHITE}${
@@ -56,13 +56,15 @@ class FriendRequestListMultiPageMenu : AbstractMultiPageFriendMenu("Your Friend 
                 .toButton { _, type ->
                     if (type!!.name.contains("RIGHT"))
                     {
+                        player.closeInventory()
+
                         KFriendHandler.cacheConn.apply {
                             sync().hdel("friends:requests:outgoing:${player.uniqueId}", uniqueId.toString())
                             sync().hdel("friends:requests:incoming:${uniqueId}", player.uniqueId.toString())
                         }
 
                         player.sendMessage(
-                            "${CC.GREEN}Cancelled friend request to $username."
+                            "${CC.GREEN}Cancelled your outgoing friend request to $username."
                         )
                     }
                 }
