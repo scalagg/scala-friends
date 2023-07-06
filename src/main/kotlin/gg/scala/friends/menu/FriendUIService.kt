@@ -31,14 +31,20 @@ object FriendUIService
     @Inject
     lateinit var plugin: FriendsSpigotPlugin
 
+    var initialLorePipe = { player: Player ->
+        listOf(
+            "${CC.GRAY}Level: ${CC.GOLD}0",
+            "${CC.GRAY}Experience: ${CC.GREEN}0"
+        )
+    }
+
     private val buttonMappings = mutableListOf(
-        { _: Player, profile: LemonPlayer ->
+        { player: Player, profile: LemonPlayer ->
             ItemBuilder
                 .of(Material.EMERALD)
                 .name("${CC.GREEN}Your Profile")
+                .setLore(initialLorePipe(player))
                 .addToLore(
-                    "${CC.GRAY}Level: ${CC.GOLD}0",
-                    "${CC.GRAY}Experience: ${CC.GREEN}0",
                     "",
                     "${CC.GRAY}Playtime: ${CC.WHITE}${
                         TimeUtil.formatIntoAbbreviatedString(
