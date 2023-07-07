@@ -50,6 +50,28 @@ fun Int.fmt() = Numbers.format(this)
 
 data class ImmutableValue(val value: Int)
 
+data class SoupProfile(
+    val _id: UUID,
+    val coins: Int,
+    val deaths: Int,
+    val kills: Int,
+    val soupsConsumed: Int,
+    val experience: Int,
+    val killStreak: Int,
+    val maxKillStreak: Int,
+) : IDataStoreObject
+{
+    override val identifier: UUID
+        get() = _id
+
+    val killDeathRatio: Float
+        get() = kotlin
+            .runCatching {
+                kills / deaths.toFloat()
+            }
+            .getOrElse { 0.0F }
+}
+
 data class UHCPlayerModel(
     val _id: UUID,
     val wins: ImmutableValue,

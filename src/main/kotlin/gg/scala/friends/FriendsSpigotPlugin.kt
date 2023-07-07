@@ -16,6 +16,7 @@ import gg.scala.friends.handler.KFriendHandler
 import gg.scala.friends.statistics.StatisticRetrievalResult
 import gg.scala.friends.statistics.StatisticsSupplier
 import gg.scala.friends.statistics.defaults.PracticeStatisticsSupplier
+import gg.scala.friends.statistics.defaults.SoupStatisticsSupplier
 import gg.scala.friends.statistics.defaults.UHCHostedStatisticsSupplier
 import gg.scala.friends.statistics.defaults.UHCStatisticsSupplier
 import gg.scala.lemon.LemonConstants
@@ -64,7 +65,16 @@ class FriendsSpigotPlugin : ExtendedScalaPlugin()
         {
             this.suppliers.add(PracticeStatisticsSupplier)
             this.suppliers.add(UHCStatisticsSupplier)
-            this.suppliers.add(UHCHostedStatisticsSupplier)
+
+            if (LemonConstants.SERVER_NAME == "Glade")
+            {
+                this.suppliers.add(UHCHostedStatisticsSupplier)
+            }
+
+            if (LemonConstants.SERVER_NAME == "Tropic")
+            {
+                this.suppliers.add(SoupStatisticsSupplier)
+            }
         }
 
         this.aware.listen(KFriendHandler)

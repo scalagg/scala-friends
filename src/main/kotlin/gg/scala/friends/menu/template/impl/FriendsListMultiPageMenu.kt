@@ -128,6 +128,8 @@ class FriendsListMultiPageMenu : AbstractMultiPageFriendMenu("Your Friends")
                         {
                             friendsPlayer.bestFriends.add(friend.key)
                         }
+
+                        openMenu(player)
                     }
                 }
         }
