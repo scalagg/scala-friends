@@ -18,7 +18,6 @@ object UHCStatisticsSupplier : StatisticsSupplier<UHCPlayerModel>()
         val practicePlayer = model as UHCPlayerModel
         val description = mutableListOf<String>()
 
-        description += "${CC.GRAY}Total played: ${CC.WHITE}${practicePlayer.played.value.fmt()}"
         description += "${CC.GRAY}Total wins: ${CC.WHITE}${practicePlayer.wins.value.fmt()}"
         description += "${CC.GRAY}Total losses: ${CC.WHITE}${practicePlayer.losses.value.fmt()}"
         description += ""

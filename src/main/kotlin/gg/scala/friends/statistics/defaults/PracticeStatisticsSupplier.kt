@@ -76,7 +76,6 @@ data class UHCPlayerModel(
     val _id: UUID,
     val wins: ImmutableValue,
     val losses: ImmutableValue,
-    val played: ImmutableValue,
     val deaths: ImmutableValue,
     val kills: ImmutableValue,
 ) : IDataStoreObject
@@ -103,7 +102,6 @@ data class UHCHostedPlayerModel(
     val _id: UUID,
     val wins: ImmutableValue,
     val losses: ImmutableValue,
-    val played: ImmutableValue,
     val deaths: ImmutableValue,
     val kills: ImmutableValue,
 ) : IDataStoreObject
