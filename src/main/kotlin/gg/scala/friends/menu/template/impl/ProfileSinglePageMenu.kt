@@ -1,15 +1,14 @@
 package gg.scala.friends.menu.template.impl
 
-import gg.scala.friends.handler.KPlayerHandler
-import gg.scala.friends.menu.FriendUIService
+import com.cryptomorin.xseries.XMaterial
 import gg.scala.friends.menu.template.AbstractSinglePageFriendMenu
-import gg.scala.friends.socials.SocialMediaProvider
-import gg.scala.friends.socials.SocialMediaTexturedButton
+import gg.scala.friends.menu.template.impl.submenus.GameStatsViewerMenu
+import gg.scala.friends.menu.template.impl.submenus.SocialMediaEditorMenu
+import gg.scala.lemon.LemonConstants
 import net.evilblock.cubed.menu.Button
 import net.evilblock.cubed.util.CC
 import net.evilblock.cubed.util.bukkit.ItemBuilder
-import net.evilblock.cubed.util.bukkit.Tasks
-import net.evilblock.cubed.util.bukkit.prompt.EzPrompt
+import org.bukkit.Material
 import org.bukkit.entity.Player
 
 /**
@@ -22,110 +21,104 @@ class ProfileSinglePageMenu : AbstractSinglePageFriendMenu("Your Profile")
         player: Player, buttons: MutableMap<Int, Button>
     )
     {
-        val friendsPlayer = KPlayerHandler
-            .find(player)
-            ?: return
-
-        for ((index, media) in SocialMediaProvider.values().withIndex())
-        {
-            val textured = SocialMediaTexturedButton(media)
-
-            buttons[12 + index] = ItemBuilder
-                .copyOf(
-                    textured.getButtonItem(player)
-                )
-                .name("${CC.GREEN}${media.name}")
-                .addToLore(
-                    "${CC.GRAY}Handle:",
-                    "${CC.WHITE}${
-                        friendsPlayer.media(media) ?: "N/A"
-                    }",
-                    "",
-                    "${CC.GRAY}Example:",
-                    "${media.color}${media.example}",
-                    "",
-                    "${CC.YELLOW}Left-Click to update!",
-                    "${CC.D_GRAY}Right-Click to reset!",
-                )
-                .toButton { _, type ->
-                    if (type!!.isRightClick)
-                    {
-                        friendsPlayer.socialMedia.remove(media)
-                        player.sendMessage("${CC.GREEN}Your handle has been reset!")
-                        return@toButton
-                    }
-
-                    player.closeInventory()
-
-                    EzPrompt(
-                        promptText = "${CC.GREEN}Please enter your ${CC.YELLOW}${media.name}${CC.GREEN} handle."
-                    ) {
-                        if (!media.regex.matches(it))
-                        {
-                            player.sendMessage("${CC.RED}That is an invalid handle for ${media.name}.")
-                            return@EzPrompt
-                        }
-
-                        friendsPlayer.socialMedia[media] = it
-
-                        friendsPlayer
-                            .save()
-                            .thenRun {
-                                player.sendMessage("${CC.GREEN}Your handle has been updated to: ${CC.WHITE}${it}!")
-
-                                Tasks.sync {
-                                    openMenu(player)
-                                }
-                            }
-                    }.start(player)
-                }
-        }
-
-        for ((index, supplier) in FriendUIService.plugin.suppliers.withIndex())
-        {
-            val stats = supplier
-                .cache[player.uniqueId]
-
-            if (stats == null)
-            {
-                buttons[22 + index] =
-                    ItemBuilder
-                        .of(supplier.gameModeIcon())
-                        .name("${CC.RED}${supplier.gameModeName()}")
-                        .addToLore(
-                            "${CC.GRAY}Your statistics for ${supplier.gameModeName()}",
-                            "${CC.GRAY}have not yet loaded.",
-                            "",
-                            "${CC.RED}Please wait a moment${FriendUIService.plugin.loadingString}"
-                        )
-                        .toButton()
-                continue
+        buttons[12] = ItemBuilder
+            .of(
+                Material.REDSTONE_COMPARATOR
+            )
+            .name("${CC.GREEN}Settings")
+            .addToLore(
+                "${CC.GRAY}Edit network-wide settings",
+                "${CC.GRAY}and options on your profile:",
+                "",
+                "${CC.YELLOW}Click to open!"
+            )
+            .toButton { _, _ ->
+                player.performCommand("settings")
             }
 
-            if (!stats.loggedIn)
-            {
-                buttons[22 + index] =
-                    ItemBuilder
-                        .of(supplier.gameModeIcon())
-                        .name("${CC.GREEN}${supplier.gameModeName()}")
-                        .addToLore(
-                            "${CC.GRAY}You haven't joined our",
-                            "${CC.GRAY}${supplier.gameModeName().lowercase()} server yet!"
-                        )
-                        .toButton()
-                continue
+        buttons[13] = ItemBuilder
+            .of(
+                Material.EYE_OF_ENDER
+            )
+            .name("${CC.GREEN}Stats Viewer")
+            .addToLore(
+                "${CC.GRAY}Showcases statistics for all",
+                "${CC.GRAY}of our gamemodes.",
+                "",
+                "${CC.YELLOW}Click to open!"
+            )
+            .toButton { _, _ ->
+                GameStatsViewerMenu().openMenu(player)
             }
 
-            buttons[22 + index] =
-                ItemBuilder
-                    .of(supplier.gameModeIcon())
-                    .name("${CC.GREEN}${supplier.gameModeName()}")
-                    .setLore(
-                        stats.render ?: listOf(
-                            "${CC.RED}Something went wrong. Contact an admin."
-                        )
+        buttons[14] = ItemBuilder
+            .of(
+                Material.BOOK_AND_QUILL
+            )
+            .name("${CC.GREEN}Social Media")
+            .addToLore(
+                "${CC.GRAY}Edit your social media",
+                "${CC.GRAY}handles for the platforms:",
+                "${CC.WHITE}- Instagram",
+                "${CC.WHITE}- Discord",
+                "${CC.WHITE}- Telegram",
+                "${CC.WHITE}- and more...",
+                "",
+                "${CC.YELLOW}Click to open!"
+            )
+            .toButton { _, _ ->
+                SocialMediaEditorMenu().openMenu(player)
+            }
+
+        buttons[15] = ItemBuilder
+            .of(
+                Material.DIAMOND
+            )
+            .name("${CC.GREEN}Achievements")
+            .addToLore(
+                "${CC.GRAY}View status for network-wide",
+                "${CC.GRAY}and game-specific achievements!",
+                "",
+                "${CC.YELLOW}Click to open!"
+            )
+            .toButton { _, _ ->
+                player.performCommand("achievements")
+            }
+
+        buttons[16] = ItemBuilder
+            .of(
+                XMaterial.RED_DYE
+            )
+            .name("${CC.GREEN}Customizer")
+            .addToLore(
+                "${CC.GRAY}Customize the appearance",
+                "${CC.GRAY}of your network profile:",
+                "${CC.WHITE}- Name color",
+                "${CC.WHITE}- Chat tags",
+                "${CC.WHITE}- Death messages",
+                "${CC.WHITE}- Kill effects",
+                "${CC.WHITE}- Float particles",
+                "${CC.WHITE}- and more...",
+                "",
+                "${CC.RED}Only available to players",
+                "${CC.RED}with rank ${CC.GOLD}Pro${CC.RED} and up!",
+                "",
+                "${CC.YELLOW}Click to open!"
+            )
+            .toButton { _, _ ->
+                if (!player.hasPermission("profile.customize"))
+                {
+                    player.sendMessage(
+                        "${CC.RED}Buy a rank at ${CC.GOLD}${
+                            LemonConstants.STORE_LINK
+                        }${CC.RED} to get access to this menu!"
                     )
-                    .toButton()
-        }
+                    return@toButton
+                }
+
+                player.closeInventory()
+                player.performCommand("customizer")
+            }
+
     }
 }

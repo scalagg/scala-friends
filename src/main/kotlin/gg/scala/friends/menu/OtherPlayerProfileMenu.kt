@@ -80,6 +80,9 @@ class OtherPlayerProfileMenu(
                 "${CC.GOLD}Instagram: ${CC.WHITE}${
                     if (this.friendPlayer == null) "Loading..." else this.friendPlayer?.media(SocialMediaProvider.Instagram) ?: "Not set"
                 }",
+                "${CC.D_AQUA}Telegram: ${CC.WHITE}${
+                    if (this.friendPlayer == null) "Loading..." else this.friendPlayer?.media(SocialMediaProvider.Telegram) ?: "Not set"
+                }",
                 "${CC.D_GRAY}GitHub: ${CC.WHITE}${
                     if (this.friendPlayer == null) "Loading..." else this.friendPlayer?.media(SocialMediaProvider.GitHub) ?: "Not set"
                 }",
