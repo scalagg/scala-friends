@@ -1,10 +1,12 @@
 package gg.scala.friends.handler
 
+import com.mongodb.client.model.Filters
 import gg.scala.aware.annotation.Subscribe
 import gg.scala.aware.message.AwareMessage
 import gg.scala.basics.plugin.profile.BasicsProfile
 import gg.scala.basics.plugin.settings.defaults.values.StateSettingValue
 import gg.scala.commons.acf.ConditionFailedException
+import gg.scala.friends.friendship.Friendship
 import gg.scala.lemon.Lemon
 import gg.scala.lemon.handler.RedisHandler
 import gg.scala.lemon.player.wrapper.AsyncLemonPlayer
@@ -13,6 +15,7 @@ import gg.scala.lemon.util.QuickAccess
 import gg.scala.lemon.util.QuickAccess.username
 import gg.scala.store.controller.DataStoreObjectControllerCache
 import gg.scala.store.storage.type.DataStoreStorageType
+import me.lucko.helper.utils.Players
 import net.evilblock.cubed.ScalaCommonsSpigot
 import net.evilblock.cubed.util.CC
 import net.evilblock.cubed.util.bukkit.Constants
@@ -34,51 +37,29 @@ object KFriendHandler
     fun subscribeOnFriendNetworkUpdate(message: AwareMessage)
     {
         val uniqueId = message.retrieve<UUID>("uniqueId")
-
-        val username = CubedCacheUtil
-            .fetchName(uniqueId)
-            ?: return
-
         val type = message.retrieve<String>("type")
 
-        for (player in Bukkit.getOnlinePlayers())
-        {
-            val friendPlayer = KPlayerHandler.find(player.uniqueId) ?: continue
+        CompletableFuture.allOf(
+            *Players.all()
+                .map {
+                    getFriendshipBetween(it.uniqueId, uniqueId)
+                        .thenAccept { friendship ->
+                            if (friendship == null)
+                                return@thenAccept
 
-            if (friendPlayer.friends[uniqueId] != null)
-            {
-                player.sendMessage("${CC.B_PRI}Friends ${CC.GRAY}${Constants.DOUBLE_ARROW_RIGHT} ${CC.GREEN}$username ${CC.SEC}$type.")
-            }
-        }
-    }
-
-    @Subscribe("friend-request-accept")
-    fun subscribeOnFriendRequestAccept(message: AwareMessage)
-    {
-        val uniqueId = message.retrieve<UUID>("uniqueId")
-        val friendPlayer = KPlayerHandler.find(uniqueId) ?: return
-
-        friendPlayer.friends[message.retrieve("friend")] = System.currentTimeMillis()
-        friendPlayer.save()
-    }
-
-    @Subscribe("friend-request-removal")
-    fun subscribeOnFriendRequestRemoval(message: AwareMessage)
-    {
-        val uniqueId = message.retrieve<UUID>("uniqueId")
-        val friendPlayer = KPlayerHandler.find(uniqueId) ?: return
-
-        friendPlayer.friends.remove(
-            message.retrieve("friend")
+                            it.sendMessage(
+                                "${CC.BD_AQUA}Friends ${CC.B_GRAY}${Constants.DOUBLE_ARROW_RIGHT} ${
+                                    if (type == "left") CC.RED else CC.GREEN
+                                }${uniqueId.username()} ${CC.YELLOW}$type."
+                            )
+                        }
+                }
+                .toTypedArray()
         )
-        friendPlayer.save()
     }
 
     fun attemptDispatchFriendRequestTo(player: Player, uniqueId: UUID): CompletableFuture<Void>
     {
-        val friendPlayer = KPlayerHandler.find(player)
-            ?: throw RuntimeException()
-
         if (player.uniqueId == uniqueId)
         {
             throw ConditionFailedException("You cannot add yourself as a friend.")
@@ -86,19 +67,24 @@ object KFriendHandler
 
         val username = CubedCacheUtil.fetchName(uniqueId)!!
 
-        if (friendPlayer.friends[uniqueId] != null)
-        {
-            throw ConditionFailedException("You already have ${CC.YELLOW}$username${CC.RED} added as a friend.")
-        }
-
-        return QuickAccess.online(uniqueId).thenCompose {
-            if (it == null)
-            {
-                throw ConditionFailedException("${CC.YELLOW}$username${CC.RED} is not online.")
+        return getFriendshipBetween(player.uniqueId, uniqueId)
+            .thenAccept {
+                if (it != null)
+                {
+                    throw ConditionFailedException("You already have ${CC.YELLOW}$username${CC.RED} added as a friend.")
+                }
             }
+            .thenComposeAsync {
+                QuickAccess.online(uniqueId)
+            }
+            .thenCompose {
+                if (it == null)
+                {
+                    throw ConditionFailedException("${CC.YELLOW}$username${CC.RED} is not online.")
+                }
 
-            handlePostPlayerOnlineCheck(player, uniqueId, username)
-        }
+                handlePostPlayerOnlineCheck(player, uniqueId, username)
+            }
     }
 
     private fun handlePostPlayerOnlineCheck(
@@ -171,9 +157,6 @@ object KFriendHandler
 
     fun attemptFriendRequestAcceptFrom(player: Player, uniqueId: UUID): CompletableFuture<Void>
     {
-        val friendPlayer = KPlayerHandler.find(player)
-            ?: throw RuntimeException()
-
         if (player.uniqueId == uniqueId)
         {
             throw ConditionFailedException("You cannot add yourself as a friend.")
@@ -181,13 +164,14 @@ object KFriendHandler
 
         val username = CubedCacheUtil.fetchName(uniqueId)!!
 
-        if (friendPlayer.friends[uniqueId] != null)
-        {
-            throw ConditionFailedException("You already have ${CC.YELLOW}$username${CC.RED} added as a friend.")
-        }
-
-        return CompletableFuture
-            .supplyAsync {
+        return getFriendshipBetween(player.uniqueId, uniqueId)
+            .thenAccept {
+                if (it != null)
+                {
+                    throw ConditionFailedException("You already have ${CC.YELLOW}$username${CC.RED} added as a friend.")
+                }
+            }
+            .thenApplyAsync {
                 hasOutgoingFriendRequestFrom(uniqueId, player.uniqueId)
             }
             .thenCompose {
@@ -204,48 +188,39 @@ object KFriendHandler
         player: Player, uniqueId: UUID, username: String
     ): CompletableFuture<Void>
     {
-        return CompletableFuture.runAsync {
-            val friendPlayer = KPlayerHandler.find(player)
-                ?: throw RuntimeException()
+        return createFriendshipBetween(player.uniqueId, uniqueId)
+            .thenRun {
+                cacheConn.apply {
+                    sync().hdel("friends:requests:incoming:${player.uniqueId}", uniqueId.toString())
+                    sync().hdel("friends:requests:outgoing:${uniqueId}", player.uniqueId.toString())
+                }
 
-            friendPlayer.friends[uniqueId] = System.currentTimeMillis()
-            friendPlayer.save()
+                QuickAccess.sendGlobalPlayerMessage(
+                    message = "${CC.GREEN}Your friend request to ${CC.PRI}${player.name}${CC.GREEN} has been accepted!",
+                    uuid = uniqueId
+                )
 
-            cacheConn.apply {
-                sync().hdel("friends:requests:incoming:${player.uniqueId}", uniqueId.toString())
-                sync().hdel("friends:requests:outgoing:${uniqueId}", player.uniqueId.toString())
+                player.sendMessage("${CC.GREEN}You've accepted ${CC.BOLD}$username's${CC.GREEN} friend request.")
             }
-
-            RedisHandler.buildMessage(
-                packet = "friend-request-accept",
-                "uniqueId" to uniqueId.toString(),
-                "friend" to player.uniqueId.toString(),
-            ).publish(
-                channel = "friends"
-            )
-
-            QuickAccess.sendGlobalPlayerMessage(
-                message = "${CC.GREEN}Your friend request to ${CC.PRI}${player.name}${CC.GREEN} has been accepted!",
-                uuid = uniqueId
-            )
-
-            player.sendMessage("${CC.SEC}You've accepted ${CC.PRI}$username's${CC.SEC} friend request.")
-        }
     }
 
-    fun attemptFriendRemoval(player: Player, uniqueId: UUID)
+    fun attemptFriendRemoval(player: Player, uniqueId: UUID): CompletableFuture<Void>
     {
-        val friendPlayer = KPlayerHandler.find(player)
-            ?: throw RuntimeException()
-
         val username = CubedCacheUtil.fetchName(uniqueId)!!
 
-        if (friendPlayer.friends[uniqueId] == null)
-        {
-            throw ConditionFailedException("${CC.YELLOW}$username${CC.RED} is not on your friends list.")
-        }
+        return getFriendshipBetween(player.uniqueId, uniqueId)
+            .thenCompose {
+                if (it == null)
+                {
+                    player.sendMessage("${CC.YELLOW}$username${CC.RED} is not on your friends list.")
+                    return@thenCompose CompletableFuture.completedFuture(null)
+                }
 
-        internalHandleFriendRemoval(player, uniqueId, username)
+                return@thenCompose deleteFrienshipBetween(player.uniqueId, uniqueId)
+                    .thenRun {
+                        internalHandleFriendRemoval(player, uniqueId, username)
+                    }
+            }
     }
 
     private fun internalHandleFriendRemoval(player: Player, uniqueId: UUID, username: String)
@@ -253,20 +228,58 @@ object KFriendHandler
         val friendPlayer = KPlayerHandler.find(player)
             ?: throw RuntimeException()
 
-        friendPlayer.friends.remove(uniqueId)
         friendPlayer.bestFriends.remove(uniqueId)
         friendPlayer.save()
 
-        RedisHandler.buildMessage(
-            packet = "friend-request-removal",
-            "uniqueId" to uniqueId.toString(),
-            "friend" to player.uniqueId.toString(),
-        ).publish(
-            channel = "friends"
+        player.sendMessage(
+            "${CC.RED}You have removed ${CC.BOLD}$username${CC.RED} from your friends list."
+        )
+    }
+
+    fun deleteFrienshipBetween(user1: UUID, user2: UUID) = getFriendshipBetween(user1, user2)
+        .thenComposeAsync {
+            if (it == null)
+                return@thenComposeAsync CompletableFuture
+                    .completedFuture(null)
+
+            DataStoreObjectControllerCache
+                .findNotNull<Friendship>()
+                .delete(
+                    it.identifier,
+                    DataStoreStorageType.MONGO
+                )
+        }
+
+    fun createFriendshipBetween(user1: UUID, user2: UUID) =
+        Friendship(player1 = user1, player2 = user2)
+            .save()
+
+    fun getFriendshipBetween(user1: UUID, user2: UUID) = DataStoreObjectControllerCache
+        .findNotNull<Friendship>()
+        .mongo()
+        .loadWithFilter(
+            Filters.or(
+                Filters.and(
+                    Filters.eq("player1", user1.toString()),
+                    Filters.eq("player2", user2.toString())
+                ),
+                Filters.and(
+                    Filters.eq("player2", user1.toString()),
+                    Filters.eq("player1", user2.toString())
+                )
+            )
         )
 
-        player.sendMessage("${CC.SEC}You've removed ${CC.PRI}$username${CC.SEC} from your friends list.")
-    }
+    fun getAllFriendshipsOf(user: UUID) = DataStoreObjectControllerCache
+        .findNotNull<Friendship>()
+        .mongo()
+        .loadAllWithFilter(
+            Filters.or(
+                Filters.eq("player1", user.toString()),
+                Filters.eq("player2", user.toString())
+            )
+        )
+        .thenApply { it.values.toList() }
 
     private fun retrieveFriendRequestStatus(uniqueId: UUID): CompletableFuture<Boolean>
     {

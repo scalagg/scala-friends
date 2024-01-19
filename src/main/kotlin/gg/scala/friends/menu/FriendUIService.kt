@@ -77,7 +77,12 @@ object FriendUIService
                     "${CC.GRAY}friends!"
                 )
                 .toButton { player, _ ->
-                    FriendsListMultiPageMenu().openMenu(player!!)
+                    KFriendHandler
+                        .getAllFriendshipsOf(player!!.uniqueId)
+                        .thenApply(::FriendsListMultiPageMenu)
+                        .thenAccept { menu ->
+                            menu.openMenu(player)
+                        }
                 }
         },
         { _: Player, _: LemonPlayer ->

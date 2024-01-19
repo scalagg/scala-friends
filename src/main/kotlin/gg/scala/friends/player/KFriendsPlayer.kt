@@ -1,11 +1,10 @@
 package gg.scala.friends.player
 
 import gg.scala.common.Savable
-import gg.scala.friends.handler.KPlayerHandler
+import gg.scala.friends.handler.KFriendHandler
 import gg.scala.friends.socials.SocialMediaProvider
 import gg.scala.lemon.util.QuickAccess
 import gg.scala.store.controller.DataStoreObjectControllerCache
-import gg.scala.store.controller.annotations.Timestamp
 import gg.scala.store.storage.storable.IDataStoreObject
 import gg.scala.store.storage.type.DataStoreStorageType
 import java.util.*
@@ -19,14 +18,9 @@ class KFriendsPlayer(
     private val uniqueId: UUID
 ) : Savable, IDataStoreObject
 {
-    @JvmField
-    @Timestamp
-    var timestamp = 0L
-
     override val identifier: UUID
         get() = uniqueId
 
-    val friends = mutableMapOf<UUID, Long>()
     val bestFriends = mutableSetOf<UUID>()
 
     val socialMedia =
@@ -39,14 +33,14 @@ class KFriendsPlayer(
         return socialMedia[provider]
     }
 
-    fun orderedFriends(): List<UUID>
-    {
-        return friends.keys.toList()
-            .sortedByDescending { friends[it]!! }
-            .sortedByDescending {
-                if (QuickAccess.online(it).join()) 1 else 0
-            }
-    }
+    fun orderedFriends() = KFriendHandler.getAllFriendshipsOf(uniqueId)
+        .thenApply {
+            it
+                .sortedByDescending { friendship -> friendship.startedOn }
+                .sortedByDescending { friendship ->
+                    if (QuickAccess.online(friendship.otherEndOf(uniqueId)).join()) 1 else 0
+                }
+        }
 
     override fun save(): CompletableFuture<Void>
     {

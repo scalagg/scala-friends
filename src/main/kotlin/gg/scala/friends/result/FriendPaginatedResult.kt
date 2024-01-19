@@ -1,25 +1,26 @@
 package gg.scala.friends.result
 
+import gg.scala.friends.friendship.Friendship
 import gg.scala.lemon.util.QuickAccess
 import gg.scala.lemon.util.QuickAccess.username
 import net.evilblock.cubed.util.CC
 import net.evilblock.cubed.util.bukkit.PaginatedResult
 import net.evilblock.cubed.util.time.DateUtil
-import org.apache.commons.lang3.time.DurationFormatUtils
-import java.util.*
+import org.bukkit.entity.Player
 
 /**
  * @author GrowlyX
  * @since 11/11/2021
  */
-object FriendPaginatedResult : PaginatedResult<UUID>()
+class FriendPaginatedResult(private val holder: Player) : PaginatedResult<Friendship>()
 {
-    override fun format(result: UUID, resultIndex: Int): String
+    override fun format(result: Friendship, resultIndex: Int): String
     {
-        val username = result.username()
+        val otherEnd = result.otherEndOf(holder.uniqueId)
+        val username = otherEnd.username()
 
         val fundamental = QuickAccess
-            .server(result).join()
+            .server(otherEnd).join()
 
         return if (fundamental != null)
         {
@@ -27,7 +28,7 @@ object FriendPaginatedResult : PaginatedResult<UUID>()
         } else
         {
             val lastLogin = QuickAccess
-                .getLastOnline(result)
+                .getLastOnline(otherEnd)
                 .join()
 
             "${CC.RED} ● ${CC.PRI}$username${CC.SEC} ${

@@ -9,7 +9,6 @@ import gg.scala.commons.issuer.ScalaPlayer
 import gg.scala.friends.menu.OtherPlayerProfileMenu
 import gg.scala.friends.menu.template.impl.ProfileSinglePageMenu
 import gg.scala.lemon.player.wrapper.AsyncLemonPlayer
-import java.util.*
 import java.util.concurrent.CompletableFuture
 
 /**

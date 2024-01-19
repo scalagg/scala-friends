@@ -24,11 +24,11 @@ object FriendListCommand : ScalaCommand()
         val friendPlayer = KPlayerHandler.find(player)
             ?: throw RuntimeException()
 
-        return CompletableFuture
-            .runAsync {
-                FriendPaginatedResult.display(
+        return friendPlayer.orderedFriends()
+            .thenAcceptAsync {
+                FriendPaginatedResult(player).display(
                     sender = player,
-                    results = friendPlayer.orderedFriends(),
+                    results = it,
                     page = page ?: 1,
                     command = "friend list %s"
                 )
