@@ -24,7 +24,15 @@ class FriendPaginatedResult(private val holder: Player) : PaginatedResult<Friend
 
         return if (fundamental != null)
         {
-            "${CC.GREEN} ● ${CC.PRI}$username${CC.SEC} is on ${CC.GREEN}${fundamental.id}${CC.SEC}."
+            val cannotInteract = !QuickAccess.canInteractWith(holder, otherEnd)
+
+            if (cannotInteract)
+            {
+                "${CC.RED} ● ${CC.PRI}$username${CC.SEC} was on a while ago."
+            } else
+            {
+                "${CC.GREEN} ● ${CC.PRI}$username${CC.SEC} is on ${CC.GREEN}${fundamental.id}${CC.SEC}."
+            }
         } else
         {
             val lastLogin = QuickAccess
@@ -32,7 +40,7 @@ class FriendPaginatedResult(private val holder: Player) : PaginatedResult<Friend
                 .join()
 
             "${CC.RED} ● ${CC.PRI}$username${CC.SEC} ${
-                if (lastLogin == null) "was never on" else "was on ${
+                if (lastLogin == null) "was on a while ago" else "was on ${
                     DateUtil.formatSimplifiedDateDiff(lastLogin)
                 } ago"
             }."

@@ -52,19 +52,12 @@ class FriendsListMultiPageMenu(val friendships: List<Friendship>) : AbstractMult
                 )
                 .apply {
                     if (
-                        !QuickAccess
-                            .online(otherEnd)
-                            .join()
-                        )
+                        !QuickAccess.online(otherEnd).join() ||
+                        !QuickAccess.canInteractWith(player, otherEnd)
+                    )
                     {
                         addToLore(
-                            "${CC.RED}Player offline",
-                            "${CC.RED}Last seen: ${CC.WHITE}${
-                                TimeUtil.formatIntoAbbreviatedString(
-                                    ((System.currentTimeMillis() - (QuickAccess.getLastOnline(otherEnd).join()
-                                        ?: System.currentTimeMillis())) / 1000).toInt()
-                                )
-                            } ago"
+                            "${CC.RED}Player offline"
                         )
                     } else
                     {

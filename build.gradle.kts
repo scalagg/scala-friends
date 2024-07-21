@@ -14,7 +14,7 @@ var currentBranch: String = grgit.branch.current().name
 
 allprojects {
     group = "gg.scala.friends"
-    version = "2.1.0${
+    version = "2.0.1${
         if (currentBranch == "develop") "-dev" else ""
     }"
 
@@ -38,7 +38,7 @@ dependencies {
     implementation("net.wesjd:anvilgui:1.5.3-SNAPSHOT")
 
     compileOnly("gg.scala.spigot:server:1.1.0")
-    compileOnly("gg.scala.lemon:bukkit:1.6.2")
+    compileOnly("gg.scala.lemon:bukkit:1.8.1")
     compileOnly("gg.scala.cloudsync:spigot:1.0.1")
 }
 
