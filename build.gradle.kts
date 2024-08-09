@@ -38,7 +38,7 @@ dependencies {
     implementation("net.wesjd:anvilgui:1.5.3-SNAPSHOT")
 
     compileOnly("gg.scala.spigot:server:1.1.0")
-    compileOnly("gg.scala.lemon:bukkit:1.8.1")
+    compileOnly("gg.scala.lemon:bukkit:1.8.3")
     compileOnly("gg.scala.cloudsync:spigot:1.0.1")
 }
 

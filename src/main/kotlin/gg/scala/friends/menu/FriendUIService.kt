@@ -9,6 +9,7 @@ import gg.scala.friends.menu.template.impl.FriendsListMultiPageMenu
 import gg.scala.friends.menu.template.impl.ProfileSinglePageMenu
 import gg.scala.lemon.handler.PlayerHandler
 import gg.scala.lemon.player.LemonPlayer
+import gg.scala.lemon.sessions.Session
 import gg.scala.lemon.util.CubedCacheUtil
 import net.evilblock.cubed.menu.Button
 import net.evilblock.cubed.menu.pagination.PaginatedMenu
@@ -48,7 +49,7 @@ object FriendUIService
                     "",
                     "${CC.GRAY}Playtime: ${CC.WHITE}${
                         TimeUtil.formatIntoAbbreviatedString(
-                            (profile.pastLogins.values.sum() / 1000).toInt()
+                            (profile.sessions().sumOf(Session::length) / 1000).toInt()
                         )
                     }",
                     "${CC.GRAY}Rank: ${CC.GREEN}${
