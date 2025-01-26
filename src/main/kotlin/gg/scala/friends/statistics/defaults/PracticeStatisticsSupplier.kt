@@ -41,7 +41,7 @@ object PracticeStatisticsSupplier : StatisticsSupplier<PracticePlayer>()
     override fun controller() = DataStoreObjectControllerCache.findNotNull<PracticePlayer>()
     override fun getDataModel() = PracticePlayer::class
 
-    override fun gameModeName() = "Duels"
+    override fun gameModeName() = "Practice"
     override fun gameModeIcon() = XMaterial.DIAMOND_SWORD
 }
 
