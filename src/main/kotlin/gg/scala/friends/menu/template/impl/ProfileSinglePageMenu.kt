@@ -101,7 +101,7 @@ class ProfileSinglePageMenu : AbstractSinglePageFriendMenu("Your Profile")
                 "${CC.WHITE}- and more...",
                 "",
                 "${CC.RED}Only available to players",
-                "${CC.RED}with rank ${CC.GOLD}Pro${CC.RED} and up!",
+                "${CC.RED}with rank ${CC.GREEN}Ember${CC.RED} and up!",
                 "",
                 "${CC.YELLOW}Click to open!"
             )
