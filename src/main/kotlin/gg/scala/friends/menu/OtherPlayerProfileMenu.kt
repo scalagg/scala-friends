@@ -16,10 +16,6 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemFlag
 import java.util.UUID
 
-/**
- * @author GrowlyX
- * @since 9/14/2022
- */
 class OtherPlayerProfileMenu(
     private val target: UUID
 ) : Menu("Viewing ${target.username()}'s Profile")

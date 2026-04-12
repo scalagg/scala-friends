@@ -6,11 +6,6 @@ import gg.scala.store.controller.DataStoreObjectControllerCache
 import gg.scala.store.storage.storable.IDataStoreObject
 import net.evilblock.cubed.util.CC
 
-/**
- * @author GrowlyX
- * @since 5/17/2023
- */
-
 object UHCStatisticsSupplier : StatisticsSupplier<UHCPlayerModel>()
 {
     override fun render(model: IDataStoreObject): List<String>

@@ -7,10 +7,6 @@ import net.evilblock.cubed.util.CC
 import net.evilblock.cubed.util.bukkit.ItemBuilder
 import org.bukkit.entity.Player
 
-/**
- * @author GrowlyX
- * @since 7/9/2023
- */
 class GameStatsViewerMenu : AbstractSinglePageSubMenu("Game Statistics", 27)
 {
     override fun configureMenuItems(player: Player, buttons: MutableMap<Int, Button>)

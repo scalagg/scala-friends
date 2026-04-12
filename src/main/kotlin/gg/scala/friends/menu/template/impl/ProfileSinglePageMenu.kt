@@ -12,10 +12,6 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemFlag
 
-/**
- * @author GrowlyX
- * @since 5/17/2023
- */
 class ProfileSinglePageMenu : AbstractSinglePageFriendMenu("Your Profile")
 {
     private fun modernButton(material: Material, title: String) = ItemBuilder

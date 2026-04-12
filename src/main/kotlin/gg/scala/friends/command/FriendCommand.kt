@@ -10,10 +10,6 @@ import gg.scala.lemon.player.wrapper.AsyncLemonPlayer
 import org.bukkit.entity.Player
 import java.util.*
 
-/**
- * @author GrowlyX
- * @since 11/11/2021
- */
 @AutoRegister
 @CommandAlias("friend|friends|fr|f")
 class FriendCommand : ScalaCommand()

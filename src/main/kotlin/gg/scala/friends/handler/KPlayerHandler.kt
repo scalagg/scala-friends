@@ -6,10 +6,6 @@ import gg.scala.flavor.service.Service
 import gg.scala.friends.player.KFriendsPlayer
 import java.util.*
 
-/**
- * @author GrowlyX
- * @since 11/10/2021
- */
 @Service
 object KPlayerHandler : ProfileOrchestrator<KFriendsPlayer>()
 {

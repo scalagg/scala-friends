@@ -5,10 +5,6 @@ import net.evilblock.cubed.menu.Button
 import net.evilblock.cubed.menu.pagination.PaginatedMenu
 import org.bukkit.entity.Player
 
-/**
- * @author GrowlyX
- * @since 5/17/2023
- */
 abstract class AbstractMultiPageFriendMenu(
     private val title: String
 ) : PaginatedMenu()

@@ -6,9 +6,6 @@ import java.util.UUID
 import java.util.concurrent.CompletableFuture
 
 /**
- * Service for managing player friendships.
- * This is a compatibility wrapper around KFriendHandler.
- *
  * @author Limo
  * @date 2/5/2026
  */

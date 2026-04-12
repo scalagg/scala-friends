@@ -27,10 +27,6 @@ import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
-/**
- * @author GrowlyX
- * @since 11/11/2021
- */
 object KFriendHandler
 {
     @Subscribe("friend-network-update")

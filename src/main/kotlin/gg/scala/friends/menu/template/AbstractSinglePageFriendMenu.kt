@@ -5,10 +5,6 @@ import net.evilblock.cubed.menu.Button
 import net.evilblock.cubed.menu.Menu
 import org.bukkit.entity.Player
 
-/**
- * @author GrowlyX
- * @since 5/17/2023
- */
 abstract class AbstractSinglePageFriendMenu(title: String) : Menu(title)
 {
     abstract fun configureMenuItems(

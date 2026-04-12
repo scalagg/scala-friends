@@ -8,10 +8,6 @@ import gg.scala.store.storage.storable.IDataStoreObject
 import gg.scala.store.storage.type.DataStoreStorageType
 import java.util.UUID
 
-/**
- * @author GrowlyX
- * @since 1/19/2024
- */
 @Model
 data class Friendship(
     @Indexed val player1: UUID,

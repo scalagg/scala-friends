@@ -23,10 +23,6 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemFlag
 
-/**
- * @author GrowlyX
- * @since 5/17/2023
- */
 @Service
 object FriendUIService
 {

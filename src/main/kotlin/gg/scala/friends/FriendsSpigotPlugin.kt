@@ -29,10 +29,6 @@ import org.bukkit.event.player.PlayerQuitEvent
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ForkJoinPool
 
-/**
- * @author GrowlyX
- * @since 11/11/2021
- */
 @Plugin(
     name = "Friends",
     version = "%remote%/%branch%/%id%"
@@ -117,7 +113,7 @@ class FriendsSpigotPlugin : ExtendedScalaPlugin()
                     .execute {
                         for (supplier in this.suppliers)
                         {
-                            // TODO: redis
+
                             val result = supplier.controller()
                                 .load(
                                     it.player.uniqueId,

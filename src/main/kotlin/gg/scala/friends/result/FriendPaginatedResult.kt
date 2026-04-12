@@ -8,10 +8,6 @@ import net.evilblock.cubed.util.bukkit.PaginatedResult
 import net.evilblock.cubed.util.time.DateUtil
 import org.bukkit.entity.Player
 
-/**
- * @author GrowlyX
- * @since 11/11/2021
- */
 class FriendPaginatedResult(private val holder: Player) : PaginatedResult<Friendship>()
 {
     override fun format(result: Friendship, resultIndex: Int): String

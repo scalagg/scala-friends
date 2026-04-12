@@ -13,10 +13,6 @@ import net.evilblock.cubed.util.bukkit.prompt.EzPrompt
 import org.bukkit.Sound
 import org.bukkit.entity.Player
 
-/**
- * @author GrowlyX
- * @since 7/9/2023
- */
 class SocialMediaEditorMenu : AbstractSinglePageSubMenu("Social Media", 27)
 {
     override fun configureMenuItems(player: Player, buttons: MutableMap<Int, Button>)

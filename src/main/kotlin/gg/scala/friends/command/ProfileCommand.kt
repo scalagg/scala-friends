@@ -11,10 +11,6 @@ import gg.scala.friends.menu.OtherPlayerProfileMenu
 import gg.scala.lemon.player.wrapper.AsyncLemonPlayer
 import java.util.concurrent.CompletableFuture
 
-/**
- * @author GrowlyX
- * @since 7/14/2022
- */
 @AutoRegister
 object ProfileCommand : ScalaCommand()
 {

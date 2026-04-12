@@ -5,10 +5,6 @@ import gg.scala.friends.statistics.StatisticsSupplier
 import gg.scala.store.controller.DataStoreObjectControllerCache
 import gg.scala.store.storage.storable.IDataStoreObject
 
-/**
- * @author GrowlyX
- * @since 5/17/2023
- */
 object UHCHostedStatisticsSupplier : StatisticsSupplier<UHCHostedPlayerModel>()
 {
     override fun render(model: IDataStoreObject) = listOf<String>()

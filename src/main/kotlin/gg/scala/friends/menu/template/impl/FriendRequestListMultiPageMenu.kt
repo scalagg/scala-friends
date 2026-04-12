@@ -11,10 +11,6 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import java.util.*
 
-/**
- * @author GrowlyX
- * @since 5/17/2023
- */
 class FriendRequestListMultiPageMenu : AbstractMultiPageFriendMenu("Your Friend Requests")
 {
     override fun configureMenuItems(

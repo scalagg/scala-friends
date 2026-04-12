@@ -10,10 +10,6 @@ import gg.scala.store.storage.type.DataStoreStorageType
 import java.util.*
 import java.util.concurrent.CompletableFuture
 
-/**
- * @author GrowlyX
- * @since 11/11/2021
- */
 class KFriendsPlayer(
     private val uniqueId: UUID
 ) : Savable, IDataStoreObject

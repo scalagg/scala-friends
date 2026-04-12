@@ -9,10 +9,6 @@ import gg.scala.friends.result.FriendPaginatedResult
 import org.bukkit.entity.Player
 import java.util.concurrent.CompletableFuture
 
-/**
- * @author GrowlyX
- * @since 11/12/2021
- */
 @AutoRegister
 object FriendListCommand : ScalaCommand()
 {

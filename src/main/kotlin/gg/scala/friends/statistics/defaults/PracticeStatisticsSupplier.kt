@@ -8,10 +8,6 @@ import net.evilblock.cubed.util.CC
 import net.evilblock.cubed.util.math.Numbers
 import java.util.*
 
-/**
- * @author GrowlyX
- * @since 7/17/2022
- */
 object PracticeStatisticsSupplier : StatisticsSupplier<PracticeProfile>()
 {
     override fun render(model: IDataStoreObject): List<String>
@@ -46,7 +42,6 @@ object PracticeStatisticsSupplier : StatisticsSupplier<PracticeProfile>()
 }
 
 fun Int.fmt() = Numbers.format(this)
-
 
 data class ImmutableValue(val value: Int)
 

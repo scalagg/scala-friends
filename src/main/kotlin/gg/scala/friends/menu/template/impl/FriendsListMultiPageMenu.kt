@@ -14,10 +14,6 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import java.util.*
 
-/**
- * @author GrowlyX
- * @since 5/17/2023
- */
 class FriendsListMultiPageMenu(val friendships: List<Friendship>) : AbstractMultiPageFriendMenu("Your Friends")
 {
     override fun configureMenuItems(

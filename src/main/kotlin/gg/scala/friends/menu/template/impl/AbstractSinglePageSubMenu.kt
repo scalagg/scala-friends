@@ -9,10 +9,6 @@ import net.evilblock.cubed.util.bukkit.Tasks
 import org.bukkit.Material
 import org.bukkit.entity.Player
 
-/**
- * @author GrowlyX
- * @since 5/17/2023
- */
 abstract class AbstractSinglePageSubMenu(
     title: String, private val size: Int,
     private val subMenu: Menu? = null

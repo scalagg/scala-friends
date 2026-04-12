@@ -3,10 +3,6 @@ package gg.scala.friends.socials
 import net.evilblock.cubed.util.bukkit.Constants
 import org.bukkit.ChatColor
 
-/**
- * @author GrowlyX
- * @since 7/14/2022
- */
 enum class SocialMediaProvider(
     val color: ChatColor,
     val regex: Regex,
