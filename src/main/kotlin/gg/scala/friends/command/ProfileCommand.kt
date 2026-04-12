@@ -6,8 +6,8 @@ import gg.scala.commons.acf.annotation.Optional
 import gg.scala.commons.annotations.commands.AutoRegister
 import gg.scala.commons.command.ScalaCommand
 import gg.scala.commons.issuer.ScalaPlayer
+import gg.scala.friends.menu.FriendUIService
 import gg.scala.friends.menu.OtherPlayerProfileMenu
-import gg.scala.friends.menu.template.impl.ProfileSinglePageMenu
 import gg.scala.lemon.player.wrapper.AsyncLemonPlayer
 import java.util.concurrent.CompletableFuture
 
@@ -26,8 +26,7 @@ object ProfileCommand : ScalaCommand()
     {
         if (target == null)
         {
-            ProfileSinglePageMenu()
-                .openMenu(player.bukkit())
+            FriendUIService.openProfileMenu(player.bukkit())
             return CompletableFuture
                 .completedFuture(null)
         }

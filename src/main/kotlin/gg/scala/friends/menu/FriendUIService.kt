@@ -21,6 +21,7 @@ import net.evilblock.cubed.util.time.TimeUtil
 import net.wesjd.anvilgui.AnvilGUI
 import org.bukkit.Material
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemFlag
 
 /**
  * @author GrowlyX
@@ -39,11 +40,17 @@ object FriendUIService
         )
     }
 
+    fun openProfileMenu(player: Player)
+    {
+        ProfileSinglePageMenu().openMenu(player)
+    }
+
     private val buttonMappings = mutableListOf(
         { player: Player, profile: LemonPlayer ->
             ItemBuilder
-                .of(Material.EMERALD)
-                .name("${CC.GREEN}Your Profile")
+                .of(Material.matchMaterial("PLAYER_HEAD") ?: Material.COMPASS)
+                .name("${CC.WHITE}Your Profile")
+                .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_POTION_EFFECTS)
                 .setLore(initialLorePipe(player))
                 .addToLore(
                     "",
@@ -65,14 +72,14 @@ object FriendUIService
                     } ago"
                 )
                 .toButton { player, _ ->
-                    ProfileSinglePageMenu()
-                        .openMenu(player!!)
+                    openProfileMenu(player!!)
                 }
         },
         { _: Player, _: LemonPlayer ->
             ItemBuilder
-                .of(Material.FIREBALL)
-                .name("${CC.GOLD}Your Friends")
+                .of(Material.matchMaterial("TOTEM_OF_UNDYING") ?: Material.BLAZE_POWDER)
+                .name("${CC.WHITE}Your Friends")
+                .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_POTION_EFFECTS)
                 .addToLore(
                     "${CC.GRAY}View all of your added",
                     "${CC.GRAY}friends!"
@@ -88,8 +95,9 @@ object FriendUIService
         },
         { _: Player, _: LemonPlayer ->
             ItemBuilder
-                .of(Material.NETHER_STAR)
+                .of(Material.matchMaterial("BELL") ?: Material.NETHER_STAR)
                 .name("${CC.WHITE}Your Friend Requests")
+                .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_POTION_EFFECTS)
                 .addToLore(
                     "${CC.GRAY}View all of your outgoing",
                     "${CC.GRAY}and incoming friend requests!"
@@ -100,8 +108,9 @@ object FriendUIService
         },
         { _: Player, _: LemonPlayer ->
             ItemBuilder
-                .of(Material.ANVIL)
-                .name("${CC.D_GRAY}Send Friend Request")
+                .of(Material.matchMaterial("WRITABLE_BOOK") ?: Material.ANVIL)
+                .name("${CC.WHITE}Send Friend Request")
+                .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_POTION_EFFECTS)
                 .addToLore(
                     "${CC.GRAY}Send out a friend request",
                     "${CC.GRAY}to a user on the network!"
@@ -110,7 +119,7 @@ object FriendUIService
                     AnvilGUI.Builder()
                         .onClose {
                             Tasks.delayed(1L) {
-                                ProfileSinglePageMenu().openMenu(player!!)
+                                openProfileMenu(player!!)
                             }
                         }
                         .onComplete { _, u ->

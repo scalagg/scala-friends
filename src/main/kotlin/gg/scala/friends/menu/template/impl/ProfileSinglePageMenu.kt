@@ -10,6 +10,7 @@ import net.evilblock.cubed.util.CC
 import net.evilblock.cubed.util.bukkit.ItemBuilder
 import org.bukkit.Material
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemFlag
 
 /**
  * @author GrowlyX
@@ -17,18 +18,19 @@ import org.bukkit.entity.Player
  */
 class ProfileSinglePageMenu : AbstractSinglePageFriendMenu("Your Profile")
 {
+    private fun modernButton(material: Material, title: String) = ItemBuilder
+        .of(material)
+        .name(title)
+        .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_POTION_EFFECTS)
+
     override fun configureMenuItems(
         player: Player, buttons: MutableMap<Int, Button>
     )
     {
-        buttons[12] = ItemBuilder
-            .of(
-                Material.REDSTONE_COMPARATOR
-            )
-            .name("${CC.GREEN}Settings")
+        buttons[11] = modernButton(Material.matchMaterial("COMPARATOR") ?: Material.COMPASS, "${CC.WHITE}Settings")
             .addToLore(
                 "${CC.GRAY}Edit network-wide settings",
-                "${CC.GRAY}and options on your profile:",
+                "${CC.GRAY}and profile preferences.",
                 "",
                 "${CC.YELLOW}Click to open!"
             )
@@ -36,14 +38,10 @@ class ProfileSinglePageMenu : AbstractSinglePageFriendMenu("Your Profile")
                 player.performCommand("settings")
             }
 
-        buttons[13] = ItemBuilder
-            .of(
-                Material.EYE_OF_ENDER
-            )
-            .name("${CC.GREEN}Stats Viewer")
+        buttons[13] = modernButton(Material.matchMaterial("SPYGLASS") ?: Material.EYE_OF_ENDER, "${CC.WHITE}Statistics")
             .addToLore(
-                "${CC.GRAY}Showcases statistics for all",
-                "${CC.GRAY}of our gamemodes.",
+                "${CC.GRAY}Open a modern breakdown",
+                "${CC.GRAY}of your network statistics.",
                 "",
                 "${CC.YELLOW}Click to open!"
             )
@@ -51,11 +49,7 @@ class ProfileSinglePageMenu : AbstractSinglePageFriendMenu("Your Profile")
                 GameStatsViewerMenu().openMenu(player)
             }
 
-        buttons[14] = ItemBuilder
-            .of(
-                Material.BOOK_AND_QUILL
-            )
-            .name("${CC.GREEN}Social Media")
+        buttons[15] = modernButton(Material.matchMaterial("WRITABLE_BOOK") ?: Material.BOOK, "${CC.WHITE}Social Media")
             .addToLore(
                 "${CC.GRAY}Edit your social media",
                 "${CC.GRAY}handles for the platforms:",
@@ -70,11 +64,7 @@ class ProfileSinglePageMenu : AbstractSinglePageFriendMenu("Your Profile")
                 SocialMediaEditorMenu().openMenu(player)
             }
 
-        buttons[15] = ItemBuilder
-            .of(
-                Material.DIAMOND
-            )
-            .name("${CC.GREEN}Achievements")
+        buttons[21] = modernButton(Material.matchMaterial("NETHER_STAR") ?: Material.DIAMOND, "${CC.WHITE}Achievements")
             .addToLore(
                 "${CC.GRAY}View status for network-wide",
                 "${CC.GRAY}and game-specific achievements!",
@@ -85,11 +75,7 @@ class ProfileSinglePageMenu : AbstractSinglePageFriendMenu("Your Profile")
                 player.performCommand("achievements")
             }
 
-        buttons[16] = ItemBuilder
-            .of(
-                XMaterial.RED_DYE
-            )
-            .name("${CC.GREEN}Customizer")
+        buttons[23] = modernButton(XMaterial.RED_DYE.parseMaterial() ?: Material.REDSTONE, "${CC.WHITE}Customizer")
             .addToLore(
                 "${CC.GRAY}Customize the appearance",
                 "${CC.GRAY}of your network profile:",
@@ -99,9 +85,6 @@ class ProfileSinglePageMenu : AbstractSinglePageFriendMenu("Your Profile")
                 "${CC.WHITE}- Kill effects",
                 "${CC.WHITE}- Float particles",
                 "${CC.WHITE}- and more...",
-                "",
-                "${CC.RED}Only available to players",
-                "${CC.RED}with rank ${CC.GOLD}Pro${CC.RED} and up!",
                 "",
                 "${CC.YELLOW}Click to open!"
             )

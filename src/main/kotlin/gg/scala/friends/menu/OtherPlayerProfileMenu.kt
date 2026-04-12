@@ -13,6 +13,7 @@ import net.evilblock.cubed.util.CC
 import net.evilblock.cubed.util.bukkit.ItemBuilder
 import org.bukkit.Material
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemFlag
 import java.util.UUID
 
 /**
@@ -64,11 +65,11 @@ class OtherPlayerProfileMenu(
         val buttons = mutableMapOf<Int, Button>()
 
         buttons[4] = ItemBuilder
-            .of(Material.SKULL_ITEM)
-            .data(3)
-            .name("${CC.GREEN}${
+            .of(Material.matchMaterial("PLAYER_HEAD") ?: Material.COMPASS)
+            .name("${CC.WHITE}${
                 this.target.username()
             }")
+            .addFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_POTION_EFFECTS)
             .addToLore(
                 "${CC.GRAY}Rank: ${
                     this.rank?.getColoredName(false) ?: "${CC.RED}Loading..."

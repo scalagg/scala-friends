@@ -52,7 +52,7 @@ abstract class AbstractSinglePageSubMenu(
             return
         }
 
-        ProfileSinglePageMenu().openMenu(player)
+        FriendUIService.openProfileMenu(player)
     }
 
     override fun onClose(

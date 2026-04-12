@@ -12,34 +12,34 @@ import java.util.*
  * @author GrowlyX
  * @since 7/17/2022
  */
-object PracticeStatisticsSupplier : StatisticsSupplier<PracticePlayer>()
+object PracticeStatisticsSupplier : StatisticsSupplier<PracticeProfile>()
 {
     override fun render(model: IDataStoreObject): List<String>
     {
-        val practicePlayer = model as PracticePlayer
+        val practiceProfile = model as PracticeProfile
         val description = mutableListOf<String>()
 
-        description += "${CC.GRAY}Total played: ${CC.WHITE}${practicePlayer.totalPlayed.fmt()}"
-        description += "${CC.GRAY}Total wins: ${CC.WHITE}${practicePlayer.totalWins.fmt()}"
-        description += "${CC.GRAY}Total losses: ${CC.WHITE}${practicePlayer.totalLosses.fmt()}"
+        description += "${CC.GRAY}Total played: ${CC.WHITE}${practiceProfile.totalPlayed.fmt()}"
+        description += "${CC.GRAY}Total wins: ${CC.WHITE}${practiceProfile.totalWins.fmt()}"
+        description += "${CC.GRAY}Total losses: ${CC.WHITE}${practiceProfile.totalLosses.fmt()}"
         description += ""
-        description += "${CC.GRAY}Unranked played: ${CC.WHITE}${practicePlayer.unrankedPlayed.fmt()}"
-        description += "${CC.GRAY}Unranked wins: ${CC.WHITE}${practicePlayer.unrankedWinCount.fmt()}"
-        description += "${CC.GRAY}Unranked losses: ${CC.WHITE}${practicePlayer.unrankedLossCount.fmt()}"
+        description += "${CC.GRAY}Unranked played: ${CC.WHITE}${practiceProfile.unrankedPlayed.fmt()}"
+        description += "${CC.GRAY}Unranked wins: ${CC.WHITE}${practiceProfile.unrankedWinCount.fmt()}"
+        description += "${CC.GRAY}Unranked losses: ${CC.WHITE}${practiceProfile.unrankedLossCount.fmt()}"
         description += ""
-        description += "${CC.GRAY}Global elo: ${CC.WHITE}${practicePlayer.globalElo.fmt()}"
+        description += "${CC.GRAY}Global elo: ${CC.WHITE}${practiceProfile.globalElo.fmt()}"
         description += ""
-        description += "${CC.GRAY}Ranked played: ${CC.WHITE}${practicePlayer.rankedPlayed.fmt()}"
-        description += "${CC.GRAY}Ranked wins: ${CC.WHITE}${practicePlayer.rankedWinCount.fmt()}"
-        description += "${CC.GRAY}Ranked losses: ${CC.WHITE}${practicePlayer.rankedLossCount.fmt()}"
+        description += "${CC.GRAY}Ranked played: ${CC.WHITE}${practiceProfile.rankedPlayed.fmt()}"
+        description += "${CC.GRAY}Ranked wins: ${CC.WHITE}${practiceProfile.rankedWinCount.fmt()}"
+        description += "${CC.GRAY}Ranked losses: ${CC.WHITE}${practiceProfile.rankedLossCount.fmt()}"
         description += ""
-        description += "${CC.GRAY}W/L ratio: ${CC.WHITE}${"%.2f".format(practicePlayer.winLossRatio)}"
+        description += "${CC.GRAY}W/L ratio: ${CC.WHITE}${"%.2f".format(practiceProfile.winLossRatio)}"
 
         return description
     }
 
-    override fun controller() = DataStoreObjectControllerCache.findNotNull<PracticePlayer>()
-    override fun getDataModel() = PracticePlayer::class
+    override fun controller() = DataStoreObjectControllerCache.findNotNull<PracticeProfile>()
+    override fun getDataModel() = PracticeProfile::class
 
     override fun gameModeName() = "Practice"
     override fun gameModeIcon() = XMaterial.DIAMOND_SWORD
@@ -124,8 +124,8 @@ data class UHCHostedPlayerModel(
             .getOrElse { 0.0F }
 }
 
-data class PracticePlayer(
-    val uniqueId: UUID,
+data class PracticeProfile(
+    val _id: UUID,
     val unrankedWinCount: Int,
     val unrankedLossCount: Int,
     val rankedWinCount: Int,
@@ -134,7 +134,7 @@ data class PracticePlayer(
 ) : IDataStoreObject
 {
     override val identifier: UUID
-        get() = uniqueId
+        get() = _id
 
     val unrankedPlayed: Int
         get() = unrankedWinCount + unrankedLossCount
