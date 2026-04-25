@@ -1,4 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -14,7 +15,7 @@ var currentBranch: String = grgit.branch.current().name
 
 allprojects {
     group = "gg.scala.friends"
-    version = "2.1.2${
+    version = "2.1.3${
         if (currentBranch == "develop") "-dev" else ""
     }"
 
@@ -82,21 +83,54 @@ tasks.withType<ShadowJar> {
     )
 }
 
+kapt {
+    keepJavacAnnotationProcessors = true
+}
+
 tasks.withType<JavaCompile> {
     options.compilerArgs.add("-parameters")
     options.fork()
     options.encoding = "UTF-8"
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions.javaParameters = true
-    kotlinOptions.jvmTarget = "21"
+kotlin {
+    jvmToolchain(jdkVersion = 21)
+}
+
+tasks {
+    withType<ShadowJar> {
+        relocate("org.joda.time", "gg.tropic.practice.datetime")
+
+        archiveClassifier.set("")
+        archiveFileName.set(
+            "friends.jar"
+        )
+    }
+
+    withType<JavaCompile> {
+        options.compilerArgs.add("-parameters")
+        options.fork()
+        options.encoding = "UTF-8"
+    }
+
+    withType<KotlinCompile> {
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_21
+            javaParameters = true
+            freeCompilerArgs.add("-Xcontext-receivers")
+        }
+    }
+
+    getByName("build") {
+        dependsOn(
+            "shadowJar",
+            "publishMavenJavaPublicationToScalaRepository"
+        )
+    }
 }
 
 publishing {
-    repositories {
-        mavenLocal()
-    }
+    repositories.configureScalaRepository(dev = currentBranch != "master")
 
     publications {
         register(
@@ -107,11 +141,8 @@ publishing {
     }
 }
 
-tasks.getByName("build")
-    .dependsOn("shadowJar")
 
-fun RepositoryHandler.configureScalaRepository(dev: Boolean = false)
-{
+fun RepositoryHandler.configureScalaRepository(dev: Boolean = false) {
     maven("${property("artifactory_contextUrl")}/gradle-${if (dev) "dev" else "release"}") {
         name = "scala"
         credentials {
